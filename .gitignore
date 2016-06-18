@@ -1,0 +1,7 @@
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles/
+*.cbp
+Makefile
+cmake_install.cmake
+*.out

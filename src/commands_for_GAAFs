@@ -1,0 +1,25 @@
+### Cube var_0
+./GA-LMS ~/Documents/Doctorate/PCDs/SPL_SupMat/Simulations/Cube/Cube_PCDs_1728pts_0.5edge_X120Y90Z45_var_v0/targetkps.pcd ~/Documents/Doctorate/PCDs/SPL_SupMat/Simulations/Cube/Cube_PCDs_1728pts_0.5edge_X120Y90Z45_var_v0/sourcekps.pcd 2e-1
+
+### Cube var_1e-05
+./GA-LMS ~/Documents/Research_at_TUM/PCL/SPL_SupMat/Simulations/Cube/Cube_PCDs_1728pts_0.5edge_X120Y90Z45_var_v1e-05/targetkps.pcd ~/Documents/Research_at_TUM/PCL/SPL_SupMat/Simulations/Cube/Cube_PCDs_1728pts_0.5edge_X120Y90Z45_var_v1e-05/sourcekps.pcd 2e-1
+
+### Bunny
+./GA-LMS_bunny ~/Documents/Research_at_TUM/GAAF_registration.git/SPL_SupMat/Simulations/Bunny/targetkps.pcd ~/Documents/Research_at_TUM/GAAF_registration.git/SPL_SupMat/Simulations/Bunny/sourcekps.pcd ~/Documents/Research_at_TUM/GAAF_registration.git/SPL_SupMat/Simulations/Bunny/cleanedCorrs.txt 8
+
+./GA-LMS_bunny ~/Documents/Research_at_TUM/GAAF_registration.git/SPL_SupMat/Simulations/Bunny/targetkps.pcd ~/Documents/Research_at_TUM/GAAF_registration.git/SPL_SupMat/Simulations/Bunny/sourcekps.pcd ~/Documents/Research_at_TUM/GAAF_registration.git/SPL_SupMat/Simulations/Bunny/cleanedCorrs.txt ~/Documents/Research_at_TUM/GAAF_registration.git/SPL_SupMat/Simulations/Bunny/good_correspondences.txt 8
+
+
+
+./GAAF_motor_cube /home/wilder/Documents/Research_at_TUM/PCL/PointCloud_1728pts_0.5edge_X120Y90Z45_var_v0/targetkps.pcd /home/wilder/Documents/Research_at_TUM/PCL/PointCloud_1728pts_0.5edge_X120Y90Z45_var_v0/sourcekps.pcd 2e-1
+
+
+
+### GA_Translator
+./GA_Translator ~/Documents/Research_at_TUM/PCL/PointCloud_1728pts_0.5edge_X0Y0Z0_var_v0/targetkps.pcd ~/Documents/Research_at_TUM/PCL/PointCloud_1728pts_0.5edge_X0Y0Z0_var_v0/sourcekps.pcd 0 0 2
+
+
+### GAAFs regular shape
+           \M (system order) \L (realizations) \N (iterations)  \mu   \var_v  
+./GA-LMS    4                 1                1000             0.01  1e-4    
+./GA-NLMS_regular 0.8   1e-4    1000
