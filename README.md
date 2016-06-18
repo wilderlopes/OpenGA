@@ -12,7 +12,7 @@ In this repository you can find the source codes and scripts (matlab and python)
 for the Geometric-Algebra Adaptive Filters (GAAFs).
 
 Here is a map of the directory structure:
-
+<pre>
 openga-----|
            src -------------> Here you can find the C++ source codes for the GAAFs and
                               compiled binaries.
@@ -23,7 +23,7 @@ openga-----|
            tutorials -------> Some tutorials written in jupyter nootebook. They are useful
                               to learn step-by-step how to call the binaries and understand
                               the GAAFs behavior.
-
+</pre>
 All the codes and scripts are heavily commented in order to make it easier for the user to understand.
 However, if you get in trouble, please send us an email: info@openga.org
 
