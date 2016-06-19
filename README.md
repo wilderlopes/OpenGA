@@ -48,7 +48,9 @@ Besides that, the following linux packages should also be installed:
 
 Python notebooks are great. However, as pointed out above, before running the tutorials one still needs to install the dependencies (libraries). Thus, to get a head-start on using OpenGA, a Docker image (based on Ubuntu 14.04 LTS) was created. A Docker image is a stripped-to-the-bare-bones linux image. Just install Docker in your machine (it is multiplatform, i.e., Linux, Windows, and Mac), download and run the OpenGA image (instructions here). As a result, it is going to create a container (which is similar to a virtual machine) inside your host system with all the necessary elements: tools, libraries, and source code.
 
-IMPORTANT: at this moment, only the standard GAAFs are available with the Docker image. For the pose-estimation GAAFs, please go to the GitHub repository. 
+IMPORTANT: at this moment, only the standard GAAFs are able to be run with the Docker image. The pose-estimation GAAFs are included in the
+<a href="https://github.com/wilderlopes/OpenGA/tree/master/scripts/GAAFs_poseEstimation">
+GitHub</a> repository files.   
 
 Step-by-step to use the OpenGA image:
                   <p></p>
@@ -56,9 +58,9 @@ Step-by-step to use the OpenGA image:
                   containing all the source codes and scripts, or clone the respository:
                   <pre>$ git clone https://github.com/wilderlopes/OpenGA.git</pre>
                   <p></p>
-                  2 - <a target="_blank" href="https://docs.docker.com/linux/">Install Docker</a>.
-                  The procedure varies by operating system. Follow the instructions in the previous link
-                  to guarantee everything is running smoothly.
+                  2 - Install Docker.
+                  The procedure varies by operating system. Go <a target="_blank" href="https://docs.docker.com/linux/">
+                  here for Linux</a> and <a target="_blank" href="https://www.docker.com/products/docker-toolbox">here for Windows or Mac OS</a>.
                   <p></p>
                   3 - Download the OpenGA Docker image <a target="_blank" href="files/openga.tar">from here</a>.
                   It is a .tar file with 495.2 MB in size.
