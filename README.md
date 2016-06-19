@@ -91,7 +91,9 @@ openga              latest              cd321034fc07        2 hours ago         
                   It will run 100 realizations, each with 1000 iterations, of the GA-LMS (standard) in a
                   system identification task. The estimated and optimal multivectors are printed on the
                   terminal, and MSE and EMSE learning curves are saved in the file 'learningCurvesGA-LMS.pdf'
-                  inside the working path.
+                  inside the working path. At the moment, the only way to change the coefficients of the plant to be identified (optimal weights)
+                  is modifying the <a target="_blank" href="https://github.com/wilderlopes/OpenGA/tree/master/src/GAAFs_standard">
+                  source codes</a> and rebuilding the binaries. 
                   <p></p>
                   You can open the file 'learningCurvesGA-LMS.pdf' from your host computer (the container
                   does not have a pdf reader). Navigate
