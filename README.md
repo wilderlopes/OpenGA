@@ -31,6 +31,8 @@ However, if you get in trouble, please send us an email: info@openga.org
 OpenGA started with researchers working on computer vision problems. However, the capabilities of GA may be useful in other applications. We welcome the help of researchers, engineers, and developers from other areas of knowledge to improve OpenGA codes. If you are willing to contribute to this project, please contact us. 
 There are two ways to get started with OpenGA. It is up to you to chose either one. However, we recommend to use the OpenGA Docker image, which contains all the necessary stuff to run the scripts. Moreover, the Docker option allows for running OpenGA in several operating systems (Linux, Windows, Mac OS).
 
+## How to Run it
+
 ###[Jupyter Notebooks]
 
 Simply download the files from GitHub (or clone the repository) and run the examples. There are examples for Python and MATLAB. Note that those are provided as Jupyter Notebooks, which should be previously installed in your computer (https://jupyter.readthedocs.io/en/latest/install.html).
