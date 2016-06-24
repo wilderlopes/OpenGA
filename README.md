@@ -36,13 +36,13 @@ There are two ways to get started with OpenGA. It is up to you to chose either o
 Simply download the files from GitHub (or clone the repository) and run the examples. There are examples for Python and MATLAB. Note that those are provided as Jupyter Notebooks, which should be previously installed in your computer (https://jupyter.readthedocs.io/en/latest/install.html).
 
 Besides that, the following linux packages should also be installed:   
+<pre>
     libboost-system1.54-dev
-    
-    python
     
     python-matplotlib
     
     libplc --> http://pointclouds.org/downloads/linux.html
+</pre>
 
 ###[Docker Image] --- Recommended
 
