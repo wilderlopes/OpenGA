@@ -8,7 +8,6 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <Eigen/Eigen>
-#include <graphics.h>
 #include <iterator> // for ostream_iterator
 #include <math.h>       /* log10 */
 #include <stdio.h>
