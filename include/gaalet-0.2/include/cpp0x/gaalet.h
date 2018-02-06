@@ -33,4 +33,6 @@
 #include "magnitude.h"
 #include "dual.h"
 
+//#include "magnitude_conjugate.h"
+
 #endif

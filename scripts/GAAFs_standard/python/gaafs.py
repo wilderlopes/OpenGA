@@ -4,20 +4,20 @@
 # www.openga.org
 # Dec 2015
 #
-# The following Python 2.7 script calls the GA-LMS (standard) binary to perform a system identification task. 
-# 
-# In this example, the multivectors samples belong to the Geometric Algebra of $\mathbb{R}^3$. 
-# Thus, each regressor and weight vector entry has 8 coefficients, i.e., for each entry of 
-# the weight vector, 8 coefficients have to be estimated. This constrasts with the usal LMS 
-# which only estimates real/complex entries. For further information, please refer to the 
-# GA documentation at www.openga.org. 
-# 
+# The following Python 2.7 script calls the GA-LMS (standard) binary to perform a system identification task.
+#
+# In this example, the multivectors samples belong to the Geometric Algebra of $\mathbb{R}^3$.
+# Thus, each regressor and weight vector entry has 8 coefficients, i.e., for each entry of
+# the weight vector, 8 coefficients have to be estimated. This constrasts with the usal LMS
+# which only estimates real/complex entries. For further information, please refer to the
+# GA documentation at www.openga.org.
+#
 # At the end, the learning curves Mean-Square Error (MSE) and/or Excess Mean-Square Error (EMSE) are plotted.
 
 # The MIT License (MIT)
 #
 # Copyright (c) 2016 onwards, by Wilder Lopes
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -36,7 +36,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-# Start by importing the necessary Python modules: 
+# Start by importing the necessary Python modules:
 import sys, string, os
 import matplotlib
 matplotlib.use('Agg')
@@ -48,36 +48,37 @@ from matplotlib.backends.backend_pdf import PdfPages
 # Simulation parameters
 #====================================================
 # The user is able to set the following AF parameters:
-# 
+#
 # Number of filter taps (system order): M
-# 
+#
 # Realizations: L
-# 
+#
 # Time iterations: N
-# 
+#
 # AF step size: mu
-# 
+#
 # Measurement Noise variance: sigma2v
 
 M       = 5 # System order
 L       = 100 # Realizations
-N       = 1000 # Time iterations
+N       = 2000 # Time iterations
 mu      = 0.005 # AF Step size
 sigma2v = 1e-3 # Variance of measurement noise
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
-		   # GA-LMS --> Complete subalgebra of R^3
+		   # GA-LMS-conjugate --> Complete subalgebra of R^3 (testing conjugate)
+           # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
 		   # GA-LMS_complex --> Even subalgebra of R^2 (isomorphic to complex numbers)
 		   # GA-LMS_real --> Even subalgebra of R (isomorphic to the real numbers)
 #====================================================
 pp = PdfPages('learningCurves' + BINARY + '.pdf') # multipage pdf to save figures
 
-# The binary is called below using the previously set parameters. The GA-LMS runs and 
-# returns .txt files with the results: *_galms.out and *_theory.out, where * represents 
-# "MSE" or "EMSE". *_galms.out files store the ensemble-average learning curves (EMSE), 
-# while *_theory.out files store the theoretical steady-state value for MSE and EMSE.  
+# The binary is called below using the previously set parameters. The GA-LMS runs and
+# returns .txt files with the results: *_galms.out and *_theory.out, where * represents
+# "MSE" or "EMSE". *_galms.out files store the ensemble-average learning curves (EMSE),
+# while *_theory.out files store the theoretical steady-state value for MSE and EMSE.
 
-# Calling binary 
+# Calling binary
 arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sigma2v)
 os.system("../../../src/GAAFs_standard/" + BINARY + "/build/" + BINARY + arguments)
 
@@ -144,4 +145,3 @@ pp.savefig()
 
 plt.close()
 pp.close()
-
