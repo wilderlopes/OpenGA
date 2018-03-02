@@ -22,8 +22,8 @@ which contains the Python script to be run. Go inside it and execute:
 
 $ python TSP_gaafs.py
 
-This should run for a while (you can go grab a cup of coffee). At the end, the
-figures will be saved in a folder called "Figures".
+This should run for a while (it could take up to 5 min).
+At the end, the figures will be saved in a folder called "Figures".
 
 If you have any trouble running the sims, or if you have suggestions to improve
 OpenGA, please do not hesitate to contact me (Wilder Lopes) at wil@openga.org.

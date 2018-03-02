@@ -66,11 +66,15 @@ import subprocess
 #
 # Measurement Noise variance: sigma2v
 
+savefolder = './Figures/'
+if not os.path.exists(savefolder):
+    os.makedirs(savefolder)
+
 ###########################################
 ### Simulations to produce Fig. 5 (Top) ###
 ###########################################
 print('### Experiments for Fig 5 (Top) ###')
-pp = PdfPages('./Figures/TSP_GAAFs_Fig_5_Top.pdf') # multipage pdf to save figures
+pp = PdfPages(savefolder + '/TSP_GAAFs_Fig_5_Top.pdf') # multipage pdf to save figures
 
 M       = 10 # System order
 L       = 100 # Realizations
@@ -122,10 +126,10 @@ plt.title('EMSE curves - ' + BINARY + ' ' + r"$\mu={}, M={}$".format(mu, M))
 plt.ylabel('EMSE (dB)')
 plt.xlabel('Iterations')
 for key in data_dic.keys():
-    plt.plot(data_dic[key][1], label = 'EMSE_theory = {}'.format(key), color = 'magenta', linestyle = '--')
-    plt.plot(data_dic[key][0], label = 'EMSE = {}'.format(key), color = 'b')
+    plt.plot(data_dic[key][1], label = r'$\sigma^2_v={}$ (theory)'.format(key), color = 'magenta', linestyle = '--')
+    plt.plot(data_dic[key][0], label = r'$\sigma^2_v={}$'.format(key), color = 'b')
 
-plt.legend()
+plt.legend(loc="best")
 #plt.savefig('EMSE.png', bbox_inches='tight')
 pp.savefig()
 #plt.show()
@@ -138,7 +142,7 @@ pp.close()
 ### Simulations to produce Fig. 5 (Middle) ###
 ##############################################
 print('### Experiments for Fig 5 (Middle) ###')
-pp = PdfPages('./Figures/TSP_GAAFs_Fig_5_Middle.pdf') # multipage pdf to save figures
+pp = PdfPages(savefolder + 'TSP_GAAFs_Fig_5_Middle.pdf') # multipage pdf to save figures
 
 M       = 10 # System order
 L       = 100 # Realizations
@@ -197,10 +201,10 @@ plt.title('EMSE curves - ' + BINARY + ' ' + r"$M={}$".format(M))
 plt.ylabel('EMSE (dB)')
 plt.xlabel('Step size')
 for key in data_dic.keys():
-    plt.plot(mu, data_dic[key][1], label = 'EMSE_theory = {}'.format(key), color = 'magenta', linestyle = '--', marker='o')
-    plt.plot(mu, data_dic[key][0], label = 'EMSE = {}'.format(key), color = 'black', marker='x')
+    plt.plot(mu, data_dic[key][1], label = r'$\sigma^2_v={}$ (theory)'.format(key), color = 'magenta', linestyle = '--', marker='o')
+    plt.plot(mu, data_dic[key][0], label = r'$\sigma^2_v={}$'.format(key), color = 'black', marker='x')
 
-plt.legend()
+plt.legend(loc="best")
 #plt.savefig('EMSE.png', bbox_inches='tight')
 pp.savefig()
 #plt.show()
@@ -212,7 +216,7 @@ pp.close()
 ### Simulations to produce Fig. 5 (Bottom) ###
 ##############################################
 print('### Experiments for Fig 5 (Bottom) ###')
-pp = PdfPages('./Figures/TSP_GAAFs_Fig_5_Bottom.pdf') # multipage pdf to save figures
+pp = PdfPages(savefolder + 'TSP_GAAFs_Fig_5_Bottom.pdf') # multipage pdf to save figures
 
 M       = [x for x in range(1,25)] # System order
 L       = 100 # Realizations
@@ -271,10 +275,83 @@ plt.title('EMSE curves - ' + BINARY + ' ' + r"$\mu={}$".format(mu))
 plt.ylabel('EMSE (dB)')
 plt.xlabel('System Order M (Taps)')
 for key in data_dic.keys():
-    plt.plot(M, data_dic[key][1], label = 'EMSE_theory = {}'.format(key), color = 'magenta', linestyle = '--', marker='o')
-    plt.plot(M, data_dic[key][0], label = 'EMSE = {}'.format(key), color = 'black', marker='x')
+    plt.plot(M, data_dic[key][1], label = r'$\sigma^2_v={}$ (theory)'.format(key), color = 'magenta', linestyle = '--', marker='o')
+    plt.plot(M, data_dic[key][0], label = r'$\sigma^2_v={}$'.format(key), color = 'black', marker='x')
 
-plt.legend()
+plt.legend(loc="best")
+#plt.savefig('EMSE.png', bbox_inches='tight')
+pp.savefig()
+#plt.show()
+plt.close()
+pp.close()
+
+
+##############################################
+###      Simulations to produce Fig. 6     ###
+##############################################
+print('### Experiments for Fig 6 ###')
+pp = PdfPages(savefolder + 'TSP_GAAFs_Fig_6.pdf') # multipage pdf to save figures
+
+M       = 10 # System order
+L       = 100 # Realizations
+N       = 2000 # Time iterations
+mu      = 0.005 # AF Step size
+sigma2v = 1e-3 # Variance of measurement noise
+BINARY  = ['GA-LMS_rotors', 'GA-LMS_complex', 'GA-LMS_real']
+		   # GA-LMS --> Complete subalgebra of R^3
+		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
+		   # GA-LMS_complex --> Even subalgebra of R^2 (isomorphic to complex numbers)
+		   # GA-LMS_real --> Even subalgebra of R (isomorphic to the real numbers)
+#====================================================
+
+# Number of points to average the EMSE:
+avgpoints = 200
+
+color_dic = {'GA-LMS_rotors' : 'blue',
+             'GA-LMS_complex' : 'green',
+             'GA-LMS_real' : 'black'}
+data_dic = {}
+for binary in BINARY:
+    data1_dB = []
+    data2_dB = []
+
+    # Calling binary
+    arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sigma2v)
+    print('> Calling binary with the following parameters: \n {}'.format(arguments))
+    os.popen("../../../src/GAAFs_standard/" + binary + "/build/" + binary + arguments)
+
+    # Load files EMSE_galms.out and EMSE_theory.out (generated by the binary) to plot
+    # EMSE learning curve and theoretical curve:
+    f1 = open('EMSE_galms.out', 'r')
+    data_label1 = ['EMSE_galms']
+    data1_list = []
+    for line in f1:
+        data1_list.append(line.rstrip('\n'))
+
+    f2 = open('EMSE_theory.out', 'r')
+    data_label2 = ['EMSE_theory']
+    data2_list = []
+    for line in f2:
+        for i in range(len(data1_list)):
+            data2_list.append(line.rstrip('\n'))
+
+    data1 = [float(j) for j in data1_list] # Converts to float
+    data2 = [float(j) for j in data2_list] # Converts to float
+    data1_dB = [10*log(x,10) for x in data1]
+    data2_dB = [10*log(x,10) for x in data2]
+
+    data_dic.update({'{}'.format(binary) : [data1_dB, data2_dB]})
+
+
+# Plot figures
+plt.title('EMSE curves - ' + r"$M={}, \mu={}, \sigma^2_v={}$".format(M, mu, sigma2v))
+plt.ylabel('EMSE (dB)')
+plt.xlabel('Iterations')
+for key in data_dic.keys():
+    plt.plot(data_dic[key][0], label = '{}'.format(key), color = color_dic[key])
+    plt.plot(data_dic[key][1], label = '{} (theory)'.format(key), color = 'magenta', linestyle = '--')
+
+plt.legend(loc="best")
 #plt.savefig('EMSE.png', bbox_inches='tight')
 pp.savefig()
 #plt.show()
