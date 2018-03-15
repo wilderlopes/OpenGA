@@ -18,9 +18,12 @@ instructions on OpenGA website: http://openga.org/getstarted.html
 
 Once the OpenGA Docker image is running, navigate to "OpenGA/scripts/TSP_GAAFs".
 There you should find this README.txt document and a folder called "python",
-which contains the Python script to be run. Go inside it and execute:
+which contains the Python script to be run. Go inside it and execute (note that
+to run the code for this submission you should use Python 3.0 or above. If your
+Python version is already 3.0 or above, you probably only need to call 'python'
+instead of 'python3' below):
 
-$ python TSP_gaafs.py
+$ python3 TSP_gaafs.py
 
 This should run for a while (it could take up to 5 min).
 At the end, the figures will be saved in a folder called "Figures".
