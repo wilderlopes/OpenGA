@@ -22,19 +22,21 @@ int main(int argc, char* argv[])
     double iterations = 1000;
     double var_v = 0;
     int M = 4; //number of taps
+    int N = 3;
     char filename[] = "filename";
 
-    typedef gaalet::algebra<gaalet::signature<3,0> > em;
 
-    std::stringstream str_filename(argv[1]);
-    str_filename >> filename;
+    //
+    // std::stringstream str_filename(argv[1]);
+    // str_filename >> filename;
 
     // TODO: the best idea is to pass a file that contains the features and
     // target. This file is read by the C++ binary which then calls the
     // kernel function and send it back to python (maybe via cython).
+    // TODO: use cython to call kernel function and feed training set.
 
-    // std::stringstream str_realizations(argv[2]);
-    // str_realizations >> realizations;
+    std::stringstream str_N(argv[1]);
+    str_N >> N;
     //
     // std::stringstream str_iterations(argv[3]);
     // str_iterations >> iterations;
@@ -45,10 +47,53 @@ int main(int argc, char* argv[])
     // std::stringstream str_var_v(argv[5]);
     // str_var_v >> var_v;
 
-    std::cout << "feature vector = " << filename << std::endl;
+    typedef gaalet::algebra<gaalet::signature<3,0> > em;
+    // std::array<std::array<mvType, 3>, 3> kernelMatrix;
+
+    em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type zero{0, 0, 0, 0, 0, 0, 0, 0};
+    vector<vector<mvType>> kernelMatrix;
+    for (int i = 0; i < N; i++) {
+      vector<mvType> row; // Create an empty row
+      for (int j = 0; j < N; j++) {
+          row.push_back(zero); // Add an element (column) to the row
+      }
+      kernelMatrix.push_back(row); // Add the row to the main vector
+    }
+
+    std::cout << "kernel matrix (initialized) = " << std::endl;
+    for(int i = 0; i < N; i++)
+    {
+        for(int j = 0; j < N; j++)
+        {
+            cout<<kernelMatrix[i][j]<<"\t";
+        }
+        cout<<endl;
+    }
 
 
+    em::mv<1, 2, 4>::type x{1, 2, 3};
+    em::mv<1, 2, 4>::type y{4, 5, 6};
 
+    for (size_t i = 0; i < N; ++i)
+    {
+      for (size_t j = 0; j < N; ++j)
+      {
+        kernelMatrix[i][j] = x*y;
+      }
+    }
+
+    std::cout << "kernel matrix = " << std::endl;
+    for(int i = 0; i < N; i++)
+    {
+        for(int j = 0; j < N; j++)
+        {
+            cout<<kernelMatrix[i][j]<<"\t";
+        }
+        cout<<endl;
+    }
+
+
+    // for (int i = 0; i < 3; ++i) std::cerr << kernelMatrix[i][:] << std::endl;
 //     // Initializing multivectors in gaalet
 //     em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type x{0, 0, 0, 0, 0, 0, 0, 0};
 //     em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type d{0, 0, 0, 0, 0, 0, 0, 0};
