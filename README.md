@@ -59,25 +59,30 @@ Step-by-step to use the OpenGA image:
                   1 - <a target="_blank" href="https://github.com/wilderlopes/OpenGA">Download the GitHub files</a>
                   containing all the source codes and scripts, or clone the respository:
                   <pre>$ git clone https://github.com/wilderlopes/OpenGA.git</pre>
-                  <br>
+                  <br><br>
                   2 - Install Docker.
                   The procedure varies by operating system. Go <a target="_blank" href="https://docs.docker.com/linux/">
                   here for Linux</a> and <a target="_blank" href="https://www.docker.com/products/docker-toolbox">here for Windows
                   or Mac OS</a>.
-                  <br>
+                  <br><br>
                   3 - It is time to download the OpenGA Docker image. There are three ways of doing it:
+                  <br>
                   Method A: Pull it from Docker Hub (<b>easiest and recommended</b>):
-                      <pre>$ docker pull wilderlopes/openga</pre>
+                      <pre>$ docker pull wilderlopes/openga</pre><br>
 
                   Method B: Download the OpenGA Docker image <a target="_blank" href="files/openga.tar">from here</a> (2.4 GB .tar file). After
                   the download, you can load it into your docker like so
-                  <pre>$ docker load < openga.tar</pre>
+
+                  <pre>$ docker load < openga.tar</pre><br><br>
 
                   Method C: Alternatively, you can build the image in your host system using the Dockerfile provided with the GitHub repository. See how to do it <a target="_blank" href="https://docs.docker.com/engine/reference/commandline/build/">here</a>
-                  <br>
+                  <br><br>
+
                   4 - Whatever is the alternative chosen above, you should now have the OpenGA Docker image available. To check it, run the following command (Linux users):
-                  <pre>$ docker images</pre>
-                  You should expect an output similar to
+                  <pre>$ docker images</pre><br>
+
+                  You should expect an output similar to<br>
+
                   <pre>REPOSITORY           TAG                 IMAGE ID            CREATED             SIZE
 wilderlopes/openga   latest              beb957393d05        About an hour ago   2.45GB</pre>
                   <br>
