@@ -8,7 +8,15 @@ set(INCLUDE_DIR "../../../../../../include")
 find_package(PCL 1.7.0 REQUIRED)
 find_package(Boost 1.36.0 COMPONENTS iostreams system filesystem)
 
-#find_package(Eigen3 REQUIRED)
+##########
+# The lines below are necessary to avoid a linking problem with libvtkproj4
+# on Ubuntu 16.04. Without that, the project can't be built. See
+# https://github.com/ros-perception/perception_pcl/pull/121/files 
+if(NOT "${PCL_LIBRARIES}" STREQUAL "")
+  list(REMOVE_ITEM PCL_LIBRARIES "vtkproj4")
+endif()
+##########
+
 include_directories(${SRC_LIST})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PCL_INCLUDE_DIRS})
@@ -20,6 +28,5 @@ add_definitions(${PCL_DEFINITIONS})
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${PCL_LIBRARIES})
-
 
 
