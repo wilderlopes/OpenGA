@@ -1,10 +1,9 @@
 import pcl
 import pickle
-# import pypcd
-# import matplotlib.pyplot as plt
 import pandas as pd
 import sys, string, os
 import numpy as np
+# import matplotlib.pyplot as plt
 from math import log
 # from mpl_toolkits.mplot3d import Axes3D
 # from matplotlib.backends.backend_pdf import PdfPages
@@ -36,9 +35,9 @@ def loadPCD(filename):
 
 if __name__ == '__main__':
 
-    savefolder = './Figures/'
-    if not os.path.exists(savefolder):
-        os.makedirs(savefolder)
+    # savefolder = './Figures/'
+    # if not os.path.exists(savefolder):
+    #     os.makedirs(savefolder)
 
     # pp = PdfPages(savefolder + '/bunny.pdf') # multipage pdf to save figures
 
