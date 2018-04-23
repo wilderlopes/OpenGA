@@ -1,4 +1,5 @@
 import os
+import collections
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -21,9 +22,10 @@ from pandas.plotting import scatter_matrix
 df = pd.read_csv(constants.DATASETPATH + 'dataset_hourly.csv')
 df[constants.DATETIME] = pd.to_datetime(df[constants.DATETIME])
 df[constants.MAINDIRECTION] =  df.loc[:, constants.MAINDIRECTION].astype(str)
+df[constants.MAINDIRECTIONDEG] = df.loc[:, constants.MAINDIRECTION].replace(constants.DIC_WIND_DIRECTION)
 print(df.dtypes)
 print(df.head())
-
+# print(collections.Counter(df[constants.MAINDIRECTION]).most_common())
 
 def plot_chart(samples):
     f, axarr = plt.subplots(2, sharex=True)
@@ -43,5 +45,5 @@ def plot_chart(samples):
 # plt.show()
 
 # Calculate scatter matrix
-scatter_matrix(df[[constants.V_AVGSPEED, constants.U_AVGSPEED]], alpha=0.2, figsize=(6, 6), diagonal='kde')
+scatter_matrix(df[[constants.V_AVGSPEED, constants.U_AVGSPEED, constants.MAINDIRECTIONDEG]], alpha=0.2, figsize=(6, 6), diagonal='kde')
 plt.show()
