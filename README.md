@@ -17,7 +17,7 @@ openga-----|
            src -------------> Here you can find the C++ source codes for the GAAFs and
                               compiled binaries.
            include ---------> A series of header files necessary for the compilation
-                              of the GAAFs. The GAALET C++ (http://gaalet.sourceforge.net/)
+                              of the GAAFs. The GAALET C++ (https://sourceforge.net/projects/gaalet/)
                               library, created by Florian Seybold, is stored here.
            scripts ---------> Matlab and Python scripts to call the binaries and run simulations.
            tutorials -------> Some tutorials written in jupyter nootebook. They are useful
