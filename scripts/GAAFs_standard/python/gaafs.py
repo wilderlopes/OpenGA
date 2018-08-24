@@ -79,7 +79,7 @@ pp = PdfPages('learningCurves' + BINARY + '.pdf') # multipage pdf to save figure
 
 # Calling binary 
 arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sigma2v)
-os.system("../../../src/GAAFs_standard/" + BINARY + "/build/" + BINARY + arguments)
+os.system("/home/openga/src/GAAFs_standard/" + BINARY + "/build/" + BINARY + arguments)
 
 # Load files MSE_galms.out and MSE_theory.out to plot MSE learning curve and theoretical curve:
 
