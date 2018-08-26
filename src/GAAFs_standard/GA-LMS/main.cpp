@@ -20,8 +20,9 @@ int main(int argc, char* argv[])
     double mu_galms = 0;
     double realizations = 10;
     double iterations = 1000;
-    double var_v = 0;
-    double var_q = 0; //
+    double var_v = 0; // measurement noise variance
+    double var_q = 0; // random walk variance
+    double corr_input = 0.95; // level of correlation between input entries
     int M = 4; //number of taps
 
     std::stringstream str_M(argv[1]);
@@ -42,6 +43,8 @@ int main(int argc, char* argv[])
     std::stringstream str_var_q(argv[6]);
     str_var_q >> var_q;
 
+    std::stringstream str_corr_input(argv[7]);
+    str_corr_input >> corr_input;
 
     //typedef gaalet::algebra<gaalet::signature<3,0> > em;
 
@@ -104,6 +107,16 @@ for (size_t j = 0; j < realizations; ++j)
 
 for (size_t i = 0; i < iterations; ++i)
     {
+
+        // Correlated input - Auto-regressive (AR) Process
+       if (corr_input > 0)
+       {
+         // Building up the Regressor vector. Note that entry n=0 is left intact.
+         for (int n=1; n < M; n++)
+         {
+           u_i.at(n) = sqrt(1 - pow(corr_input, 2))*u_i.at(n) + corr_input*u_i.at(n-1);
+         }
+       }
 
         // Desirable output
         for (size_t j = 0; j < 8; ++j)
@@ -172,10 +185,8 @@ for (size_t i = 0; i < iterations; ++i)
 
     for (size_t r = 0; r < iterations; ++r)
     {
-
-	MSE_galms_avg[r] = MSE_galms_avg[r] + MSE_galms[r]/realizations;
-        EMSE_galms_avg[r] = EMSE_galms_avg[r] + EMSE_galms[r]/realizations;
-
+      MSE_galms_avg[r] = MSE_galms_avg[r] + MSE_galms[r]/realizations;
+      EMSE_galms_avg[r] = EMSE_galms_avg[r] + EMSE_galms[r]/realizations;
     }
 
     w_avg = array_sum(w_avg,array_prod((1/realizations),w_new)); // averaging estimated w

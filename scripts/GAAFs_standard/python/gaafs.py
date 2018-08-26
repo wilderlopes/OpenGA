@@ -61,10 +61,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 M       = 5 # System order
 L       = 100 # Realizations
-N       = 1000 # Time iterations
+N       = 3000 # Time iterations
 mu      = 0.005 # AF Step size
 sigma2v = 1e-3 # Variance of measurement noise
-sigma2q = 1e-6 # Variance of measurement noise
+sigma2q = 0 # Variance of measurement noise
+corr_input = 0.95 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
@@ -79,7 +80,7 @@ pp = PdfPages('learningCurves' + BINARY + '.pdf') # multipage pdf to save figure
 # while *_theory.out files store the theoretical steady-state value for MSE and EMSE.
 
 # Calling binary
-arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu) + " " + str(sigma2v) + " " + str(sigma2q)
+arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu) + " " + str(sigma2v) + " " + str(sigma2q) + " " + str(corr_input)
 os.system("../../../src/GAAFs_standard/" + BINARY + "/build/" + BINARY + arguments)
 
 # Load files MSE_galms.out and MSE_theory.out to plot MSE learning curve and theoretical curve:
