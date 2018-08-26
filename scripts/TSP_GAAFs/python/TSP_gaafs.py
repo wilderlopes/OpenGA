@@ -76,6 +76,8 @@ L       = 100 # Realizations
 N       = 1000 # Time iterations
 mu      = 0.01 # AF Step size
 sigma2v = [1e-2, 1e-3, 1e-5] # Variance of measurement noise
+sigma2q = 0 # Variance of random-walk noise
+corr_input = 0.95 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
@@ -88,7 +90,7 @@ for sig in sigma2v:
     # The binary is called below using the previously set parameters. The GA-LMS runs and returns .txt files with the results: *_galms.out and *_theory.out, where * represents "MSE" or "EMSE". *_galms.out files store the ensemble-average learning curves (EMSE), while *_theory.out files store the theoretical steady-state value for MSE and EMSE.
 
     # Calling binary
-    arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sig)
+    arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sig) + " " + str(sigma2q) + " " + str(corr_input)
     print('> Calling binary with the following parameters: \n {}'.format(arguments))
     os.popen("../../../src/GAAFs_standard/" + BINARY + "/build/" + BINARY + arguments).read()
 
@@ -142,6 +144,8 @@ L       = 100 # Realizations
 N       = 1000 # Time iterations
 mu      = [0.005, 0.0075, 0.01, 0.0125, 0.015, 0.0175, 0.02, 0.0225] # AF Step size
 sigma2v = [1e-2, 1e-3, 1e-5] # Variance of measurement noise
+sigma2q = 0 # Variance of random-walk noise
+corr_input = 0.95 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
@@ -159,7 +163,7 @@ for sig in sigma2v:
     for step in mu:
 
         # Calling binary
-        arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(step)+ " " + str(sig)
+        arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(step)+ " " + str(sig)  + " " + str(sigma2q) + " " + str(corr_input)
         print('> Calling binary with the following parameters: \n {}'.format(arguments))
         os.popen("../../../src/GAAFs_standard/" + BINARY + "/build/" + BINARY + arguments).read()
 
@@ -216,6 +220,8 @@ L       = 100 # Realizations
 N       = 1000 # Time iterations
 mu      = 0.01 # AF Step size
 sigma2v = [1e-2, 1e-3, 1e-5] # Variance of measurement noise
+sigma2q = 0 # Variance of random-walk noise
+corr_input = 0.95 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
@@ -233,7 +239,7 @@ for sig in sigma2v:
     for order in M:
 
         # Calling binary
-        arguments = " " + str(order) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sig)
+        arguments = " " + str(order) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sig)  + " " + str(sigma2q) + " " + str(corr_input)
         print('> Calling binary with the following parameters: \n {}'.format(arguments))
         os.popen("../../../src/GAAFs_standard/" + BINARY + "/build/" + BINARY + arguments).read()
 
@@ -290,6 +296,8 @@ L       = 100 # Realizations
 N       = 2000 # Time iterations
 mu      = 0.005 # AF Step size
 sigma2v = 1e-3 # Variance of measurement noise
+sigma2q = 0 # Variance of random-walk noise
+corr_input = 0.95 # Level of correlation between input's entries.
 BINARY  = ['GA-LMS_rotors', 'GA-LMS_complex', 'GA-LMS_real']
 		   # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
@@ -309,7 +317,7 @@ for binary in BINARY:
     data2_dB = []
 
     # Calling binary
-    arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sigma2v)
+    arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sigma2v)  + " " + str(sigma2q) + " " + str(corr_input)
     print('> Calling binary with the following parameters: \n {}'.format(arguments))
     os.popen("../../../src/GAAFs_standard/" + binary + "/build/" + binary + arguments).read()
 

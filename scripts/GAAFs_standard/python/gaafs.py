@@ -64,7 +64,7 @@ L       = 100 # Realizations
 N       = 3000 # Time iterations
 mu      = 0.005 # AF Step size
 sigma2v = 1e-3 # Variance of measurement noise
-sigma2q = 0 # Variance of measurement noise
+sigma2q = 0 # Variance of random-walk noise
 corr_input = 0.95 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
@@ -103,7 +103,8 @@ data2 = [float(j) for j in data2_list] # Converts to float
 data1_dB = [10*log(x,10) for x in data1]
 data2_dB = [10*log(x,10) for x in data2]
 
-plt.title('MSE curves - ' + BINARY)
+plt.title('MSE curves - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
+          mu, sigma2v, sigma2q, corr_input), fontsize=9)
 plt.ylabel('MSE (dB)')
 plt.xlabel('Iterations')
 plt.plot(data1_dB, label = 'MSE_galms')
@@ -134,7 +135,8 @@ data2 = [float(j) for j in data2_list] # Converts to float
 data1_dB = [10*log(x,10) for x in data1]
 data2_dB = [10*log(x,10) for x in data2]
 
-plt.title('EMSE curves - ' + BINARY)
+plt.title('EMSE curves - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
+          mu, sigma2v, sigma2q, corr_input), fontsize=9)
 plt.ylabel('EMSE (dB)')
 plt.xlabel('Iterations')
 plt.plot(data1_dB, label = 'EMSE_galms', color = 'r')
