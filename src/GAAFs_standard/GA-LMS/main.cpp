@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
     double realizations = 10;
     double iterations = 1000;
     double var_v = 0;
+    double var_q = 0; //
     int M = 4; //number of taps
 
     std::stringstream str_M(argv[1]);
@@ -38,6 +39,9 @@ int main(int argc, char* argv[])
     std::stringstream str_var_v(argv[5]);
     str_var_v >> var_v;
 
+    std::stringstream str_var_q(argv[6]);
+    str_var_q >> var_q;
+
 
     //typedef gaalet::algebra<gaalet::signature<3,0> > em;
 
@@ -46,6 +50,7 @@ int main(int argc, char* argv[])
     em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type x{0, 0, 0, 0, 0, 0, 0, 0};
     em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type d{0, 0, 0, 0, 0, 0, 0, 0};
     em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type v{0, 0, 0, 0, 0, 0, 0, 0};
+    em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type q{0, 0, 0, 0, 0, 0, 0, 0};
     em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type w_old_entry{0, 0, 0, 0, 0, 0, 0, 0};
     em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type w_new_entry{0, 0, 0, 0, 0, 0, 0, 0};
     em::mv<0, 1, 2, 3, 4, 5, 6, 7>::type wo{0.55, 0, 1, 2, 0.71, 1.3, 4.5, 3};
@@ -69,7 +74,7 @@ int main(int argc, char* argv[])
 
     std::vector<double> MSE_galms_avg;
     std::vector<double> EMSE_galms_avg;
-    
+
     // Resizing the following vectors to allocate memmory. Otherwise
     // a 'segmentation fault' occurs.
     MSE_galms_avg.resize(iterations);
@@ -100,7 +105,7 @@ for (size_t j = 0; j < realizations; ++j)
 for (size_t i = 0; i < iterations; ++i)
     {
 
-        // Desirable output        
+        // Desirable output
         for (size_t j = 0; j < 8; ++j)
         {
             v[j] = normaldist(u); // generates normally distributed samples for noise
@@ -115,6 +120,16 @@ for (size_t i = 0; i < iterations; ++i)
         EMSE_galms.push_back(pow(emse_galms,2)); // .push_back shifts the previous content of the vector
         //MSD_galms.push_back(10*log10(pow(msd_galms,2))); // .push_back shifts the previous content of the vector
         w_new = array_sum(w_old,array_prod(mu_galms,array_prod(u_i,(d - array_prod(reverse_array(u_i),w_old)))));
+
+        // Random walk
+        for (int n=0; n < M; n++)
+        {
+          for (size_t j = 0; j < 8; ++j)
+          {
+            q[j] = normaldist(u); // generates normally distributed samples for random-walk noise
+          }
+          w_new.at(n) = w_new.at(n) + sqrt(var_q)*q;
+        }
 
         w_old = w_new;
 
@@ -143,7 +158,7 @@ for (size_t i = 0; i < iterations; ++i)
         {
             for (size_t j = 0; j < 8; ++j)
             {
-                x[j] = normaldist(u);                
+                x[j] = normaldist(u);
             }
             u_i.at(n)  = x;
         }
@@ -157,7 +172,7 @@ for (size_t i = 0; i < iterations; ++i)
 
     for (size_t r = 0; r < iterations; ++r)
     {
-        
+
 	MSE_galms_avg[r] = MSE_galms_avg[r] + MSE_galms[r]/realizations;
         EMSE_galms_avg[r] = EMSE_galms_avg[r] + EMSE_galms[r]/realizations;
 
