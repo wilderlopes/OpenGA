@@ -10,8 +10,8 @@ NS_HORZ_GROUNDSPEED = 'Ydot'
 EW_HORZ_GROUNDSPEED = 'Xdot'
 VERT_SPEED = 'Zdot'
 VERTICALACCEL = 'Zdotdot'
-
-COLS_FOR_SIM = [MACHNUMBER, ROLL, PITCH, YAW]
+TRUEAIRSPEED = 'TAS' # m/s       0.01       99999
+COLS_FOR_SIM = [VERTICALACCEL, ROLL, PITCH, YAW]
 
 # Static Pressure (Psta) mb 0.1 99999
 # Static Temperature * (Tsta) K 0.01 99999

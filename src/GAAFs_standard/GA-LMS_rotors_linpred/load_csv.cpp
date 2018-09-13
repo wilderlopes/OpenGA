@@ -4,7 +4,7 @@
 
 int main()
 {
-    int n_rows = 474;
+    int n_rows = 475;
     int n_cols = 5;
 
     double data[n_rows][n_cols];
@@ -18,20 +18,20 @@ int main()
             break;
 
         std::stringstream iss(line);
-        std::cout << "line = " << line << std::endl;
+        // std::cout << "line = " << line << std::endl;
 
         for (int col = 0; col < n_cols; ++col)
         {
             std::string val;
-            // std::cout << "iss = " << iss << std::endl;
             std::getline(iss, val, ',');
-            if ( !iss.good() )
-                break;
+            // Hat to comment out lines below otherwise conversion of negative
+            // strings doesn't happen.
+            // if ( !iss.good() )
+            //     break;
+
+            // std::cout << "val = " << val << std::endl;
 
             std::stringstream convertor(val);
-            // std::stringstream(val)
-            std::cout << "val = " << val << std::endl;
-            // std::cout << "convertor = " << val << std::endl;
             convertor >> data[row][col];
         }
     }
