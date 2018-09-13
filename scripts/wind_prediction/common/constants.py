@@ -1,36 +1,40 @@
-import numpy as np
-# Processing raw data
-# umed: velocidade média zonal (leste-oeste)
-# vmed: velocidade média meridional (norte-sul)
+ROLL = 'ROLL' # deg 0.01 99999
+PITCH = 'PIT' # deg 0.01 99999
+YAW = 'YAW' # deg 0.01 99999
+ANGLEOFATTACK = 'AOA'
+MACHNUMBER = 'MACH'
+EW_HORZ_WINDSPEED = 'U'
+NS_HORZ_WINDSPEED = 'V'
+VERT_WINDSPEED = 'W'
+NS_HORZ_GROUNDSPEED = 'Ydot'
+EW_HORZ_GROUNDSPEED = 'Xdot'
+VERT_SPEED = 'Zdot'
+VERTICALACCEL = 'Zdotdot'
 
-RAWDATAPATH = '../../data/anemometer/rawdata/'
-DATASETPATH = '../../data/anemometer/'
-FILESHOURLY = ['vmed_meridional.txt', 'umed_zonal.txt', 'dirdom.txt', 'rajh.txt']
-FILESDAILY  = ['rajd.txt', 'dirrajd.txt']
+COLS_FOR_SIM = [MACHNUMBER, ROLL, PITCH, YAW]
 
-# Constants
-DATETIME            = 'datetime'
-V_AVGSPEED          = 'v_avg_speed'
-U_AVGSPEED          = 'u_avg_speed'
-MAINDIRECTION       = 'main_direction'
-MAINDIRECTIONDEG    = 'main_direction_deg'
-MAXGUSTSPEED        = 'max_gust_speed'
-
-# Wind direction: string to float
-DIC_WIND_DIRECTION  = {'E':   0.0,
-                      'ENE': 22.5,
-                      'NE':  45.0,
-                      'NNE': 67.5,
-                      'N':   90.0,
-                      'NNW': 112.5,
-                      'NW':  135.0,
-                      'WNW': 157.5,
-                      'W':   180.0,
-                      'WSW': 202.5,
-                      'SW':  225.0,
-                      'SSW': 247.5,
-                      'S':   270.0,
-                      'SSE': 292.5,
-                      'SE':  315.0,
-                      'ESE': 337.5,
-                      'C':   np.nan}
+# Static Pressure (Psta) mb 0.1 99999
+# Static Temperature * (Tsta) K 0.01 99999
+# True Air Speed * (TAS) m/s 0.01 99999
+# E-W Horizontal Wind Speed * (U) m/s 0.01 999999
+# N-S Horizontal Wind Speed * (V) m/s 0.01 999999
+# Vertical Wind Speed *@ (W) m/s 0.001 999999
+# LOG10 Turbulent Dissipation Rate (TEDR) Kw/Kg 0.01 99999
+# LOG10 Reynolds Number per Length (REYN) /m 0.01 9999
+# Latitude +N (LAT) deg 0.001 999999
+# Longitude +E (LONG) deg 0.001 9999999
+# Pressure Altitude (PALT) m 0.1 999999
+# Potential Temperature * (POT) K 0.01 99999
+# Roll Angle +right wing down (ROLL) deg 0.01 99999
+# Heading Angle (HDG) deg 0.01 99999
+# Pitch Angle (PITCH) deg 0.01 99999
+# N-S Ground Speed +N (Ydot) m/s 0.01 999999
+# E-W Ground Speed +E (Xdot) m/s 0.01 999999
+# Vertical Speed +U @ (Zdot) m/s 0.001 999999
+# Q (Compressible Dynamic Pressure) (q) mb 0.01 999999
+# Yaw Angle (sideslip angle) (YAW) deg 0.01 99999
+# Angle of Attack (AOA) deg 0.01 99999
+# Mach Number (MACH) 0.0001 999999
+# Vertical Acceleration +U (Zdotdot) m/ss 0.001 999999
+# Yaw delta P (Ydp) mb 0.001 999999
+# AOA delta P (Adp) mb 0.001 999999
