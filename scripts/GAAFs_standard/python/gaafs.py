@@ -59,18 +59,19 @@ from matplotlib.backends.backend_pdf import PdfPages
 #
 # Measurement Noise variance: sigma2v
 
-M       = 5 # System order
-L       = 100 # Realizations
-N       = 3000 # Time iterations
-mu      = 0.005 # AF Step size
-sigma2v = 1e-3 # Variance of measurement noise
+M       = 10 # System order
+L       = 1 # Realizations
+N       = 460 # Time iterations
+mu      = 1e-7 # AF Step size
+sigma2v = 1e-10 # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
 corr_input = 0.95 # Level of correlation between input's entries.
-BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
+BINARY  = 'GA-LMS_rotors_linpred' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
 		   # GA-LMS_complex --> Even subalgebra of R^2 (isomorphic to complex numbers)
 		   # GA-LMS_real --> Even subalgebra of R (isomorphic to the real numbers)
+           # GA-LMS_rotors_linpred --> Even subalgebra of R (isomorphic to the real numbers)
 #====================================================
 pp = PdfPages('learningCurves' + BINARY + '.pdf') # multipage pdf to save figures
 

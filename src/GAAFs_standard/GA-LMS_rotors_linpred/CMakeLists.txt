@@ -1,4 +1,4 @@
-project(GA-LMS_rotors)
+project(GA-LMS_rotors_linpred)
 cmake_minimum_required(VERSION 2.8)
 set(CMAKE_BUILD_TYPE RELEASE)
 set(SRC ".")

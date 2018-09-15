@@ -25,6 +25,8 @@ int main(int argc, char* argv[])
     double realizations = 10;
     double iterations = 1000;
     double var_v = 0;
+    double var_q = 0; // random walk variance
+    double corr_input = 0.95; // level of correlation between input entries
     int M = 4; //number of taps
     int n_rows = 474;
     int n_cols = 4;
@@ -45,6 +47,11 @@ int main(int argc, char* argv[])
     std::stringstream str_var_v(argv[5]);
     str_var_v >> var_v;
 
+    std::stringstream str_var_q(argv[6]);
+    str_var_q >> var_q;
+
+    std::stringstream str_corr_input(argv[7]);
+    str_corr_input >> corr_input;
 
     // Loading data
     // std::ifstream file("/home/wilder/dev/OpenGA/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv");
