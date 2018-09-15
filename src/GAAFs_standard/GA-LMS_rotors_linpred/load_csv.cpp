@@ -4,35 +4,41 @@
 
 int main()
 {
-    int n_rows = 475;
-    int n_cols = 5;
+    int n_rows = 474;
+    int n_cols = 4;
 
     double data[n_rows][n_cols];
     std::ifstream file("/home/wilder/dev/OpenGA/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv");
 
-    for(int row = 0; row < n_rows; ++row)
+    for(int row = -1; row < n_rows; ++row)
     {
         std::string line;
         std::getline(file, line);
-        if ( !file.good() )
-            break;
+        // if ( !file.good() )
+        //     break;
 
         std::stringstream iss(line);
         // std::cout << "line = " << line << std::endl;
 
-        for (int col = 0; col < n_cols; ++col)
+        if (row >= 0)
         {
+          for (int col = -1; col < n_cols; ++col)
+          {
             std::string val;
             std::getline(iss, val, ',');
-            // Hat to comment out lines below otherwise conversion of negative
-            // strings doesn't happen.
-            // if ( !iss.good() )
-            //     break;
+              if (col >= 0)
+              {
+                // Hat to comment out lines below otherwise conversion of negative
+                // strings doesn't happen.
+                // if ( !iss.good() )
+                //     break;
 
-            // std::cout << "val = " << val << std::endl;
+                // std::cout << "val = " << val << std::endl;
 
-            std::stringstream convertor(val);
-            convertor >> data[row][col];
+                std::stringstream convertor(val);
+                convertor >> data[row][col];
+              }
+          }
         }
     }
 

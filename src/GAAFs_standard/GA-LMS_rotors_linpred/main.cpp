@@ -26,6 +26,9 @@ int main(int argc, char* argv[])
     double iterations = 1000;
     double var_v = 0;
     int M = 4; //number of taps
+    int n_rows = 474;
+    int n_cols = 4;
+    double data[n_rows][n_cols];
 
     std::stringstream str_M(argv[1]);
     str_M >> M;
@@ -43,23 +46,70 @@ int main(int argc, char* argv[])
     str_var_v >> var_v;
 
 
+    // Loading data
+    std::ifstream file("/home/wilder/dev/OpenGA/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv");
+
+    for(int row = -1; row < n_rows; ++row)
+    {
+      std::string line;
+      std::getline(file, line);
+
+      if (row >= 0)
+      {
+        // if ( !file.good() )
+        //     break;
+
+        std::stringstream iss(line);
+
+        for (int col = -1; col < n_cols; ++col)
+        {
+            std::string val;
+            std::getline(iss, val, ',');
+            if (col >= 0)
+            {
+              // Hat to comment out lines below otherwise conversion of negative
+              // strings doesn't happen.
+              // if ( !iss.good() )
+              //     break;
+
+              std::stringstream convertor(val);
+              convertor >> data[row][col];
+            }
+        }
+      }
+    }
+
+    // Print data
+    std::cout << "data array = \n" << std::endl;
+    for (int i = 0; i < n_rows; ++i)
+    {
+        for (int j = 0; j < n_cols; ++j)
+        {
+            std::cout << data[i][j] << ' ';
+        }
+        std::cout << std::endl;
+    }
+
+
+
+
     // Initializing multivectors in gaalet
     mvType x{0, 0, 0, 0};
     mvType d{0, 0, 0, 0};
     mvType v{0, 0, 0, 0};
     mvType w_old_entry{0, 0, 0, 0};
     mvType w_new_entry{0, 0, 0, 0};
-    mvType wo{0.55, 2, 1.3, 4.5};
+    mvType Ui{0.55, 2, 1.3, 4.5};
 
     //Inititalizing arrays of multivectors
     std::vector<mvType> u_i; //Array of regressors
-    std::vector<mvType> wo_i; //Array - plant model
+    // std::vector<mvType> Ui; //Array - plant model
     std::vector<mvType> w_old; //Array - weight vector (old)
     std::vector<mvType> w_new; //Array - weight vector (new)
     std::vector<mvType> w_avg; //Array - weight vector averaged over realizations
 
     u_i.resize(M);
-    wo_i.resize(M);
+    // Ui.resize(M);
     w_old.resize(M);
     w_new.resize(M);
     w_avg.resize(M);
@@ -68,12 +118,12 @@ int main(int argc, char* argv[])
     std::normal_distribution<double> normaldist(0,1); //Gaussian Distribution, mean=0, stddev=1;
 
     std::vector<double> MSE_galms_avg;
-    std::vector<double> EMSE_galms_avg;
+    // std::vector<double> EMSE_galms_avg;
 
     // Resizing the following vectors to allocate memmory. Otherwise
     // a 'segmentation fault'
     MSE_galms_avg.resize(iterations);
-    EMSE_galms_avg.resize(iterations);
+    // EMSE_galms_avg.resize(iterations);
 
 
 for (size_t j = 0; j < realizations; ++j)
@@ -81,39 +131,44 @@ for (size_t j = 0; j < realizations; ++j)
 
     std::cout << "Realization = " << j+1 << "of" << realizations << std::endl;
 
-    for (int n=0; n < M; n++) //populating the arrays - regressor and noise
-    {
-        for (size_t j = 0; j < 4; ++j)
-        {
-            x[j] = normaldist(u);
-            //v[j] = normaldist(u); // generates normally distributed samples for noise
-        }
-        u_i.at(n)  = x;
-        wo_i.at(n) = wo;
-        w_old.at(n) = w_old_entry;
-        w_new.at(n) = w_new_entry;
-    }
-
     // Redefining MSE_galms and EMSE_galms before each realization
     std::vector<double> MSE_galms;
-    std::vector<double> EMSE_galms;
+    // std::vector<double> EMSE_galms;
 
 for (size_t i = 0; i < iterations; ++i)
     {
+
+        for (int n=i; n < (i + M); n++) //populating the arrays - regressor and noise
+        {
+            for (size_t j = 0; j < 4; ++j)
+            {
+                x[j] = data[n][j]
+                // x[j] = normaldist(u);
+                //v[j] = normaldist(u); // generates normally distributed samples for noise
+            }
+            u_i.at(n)  = x;
+            w_old.at(n) = w_old_entry;
+            w_new.at(n) = w_new_entry;
+        }
+        Ui = data[i+M];
+
+        std::cout << "Ui = " << Ui << std::endl;
 
         // Desirable output
         for (size_t j = 0; j < 4; ++j)
         {
             v[j] = normaldist(u); // generates normally distributed samples for noise
         }
-        d = array_prod(reverse_array(u_i),wo_i) + sqrt(var_v)*v;
+        d = Ui + sqrt(var_v)*v;
+
+        std::cout << "d = " << d << std::endl;
 
         //GA-LMS
         error_galms = (double) eval(magnitude(d - array_prod(reverse_array(u_i),w_old)));
-        emse_galms = (double) eval(magnitude(array_prod(reverse_array(u_i),array_sub(wo_i,w_old))));
+        // emse_galms = (double) eval(magnitude(array_prod(reverse_array(u_i),array_sub(wo_i,w_old))));
         //msd_galms = (double) eval(magnitude(array_sub(wo_i,w_old)));
         MSE_galms.push_back(pow(error_galms,2)); // .push_back shifts the previous content of the vector
-        EMSE_galms.push_back(pow(emse_galms,2)); // .push_back shifts the previous content of the vector
+        // EMSE_galms.push_back(pow(emse_galms,2)); // .push_back shifts the previous content of the vector
         //MSD_galms.push_back(10*log10(pow(msd_galms,2))); // .push_back shifts the previous content of the vector
         w_new = array_sum(w_old,array_prod(mu_galms,array_prod(u_i,(d - array_prod(reverse_array(u_i),w_old)))));
 
@@ -140,14 +195,14 @@ for (size_t i = 0; i < iterations; ++i)
         */
 
         //Regenerating regressor - no shift register ==============
-        for (int n=0; n < M; n++)
-        {
-            for (size_t j = 0; j < 4; ++j)
-            {
-                x[j] = normaldist(u);
-            }
-            u_i.at(n)  = x;
-        }
+        // for (int n=0; n < M; n++)
+        // {
+        //     for (size_t j = 0; j < 4; ++j)
+        //     {
+        //         x[j] = normaldist(u);
+        //     }
+        //     u_i.at(n)  = x;
+        // }
 
         //std::cout << "new regressor = " << std::endl;
         //for (int n = 0; n < M; ++n)
@@ -160,7 +215,7 @@ for (size_t i = 0; i < iterations; ++i)
     {
 
         MSE_galms_avg[r] = MSE_galms_avg[r] + MSE_galms[r]/realizations;
-        EMSE_galms_avg[r] = EMSE_galms_avg[r] + EMSE_galms[r]/realizations;
+        // EMSE_galms_avg[r] = EMSE_galms_avg[r] + EMSE_galms[r]/realizations;
 
     }
 
@@ -169,13 +224,13 @@ for (size_t i = 0; i < iterations; ++i)
 
 
     MSE_theory  = (4*var_v) + mu_galms*(M*4)*(4*var_v)/(2-mu_galms*(M*4));
-    EMSE_theory = mu_galms*(M*4)*(4*var_v)/(2-mu_galms*(M*4));
+    // EMSE_theory = mu_galms*(M*4)*(4*var_v)/(2-mu_galms*(M*4));
 
     std::cout << "Iterations = " << iterations << std::endl;
     std::cout << "Number of taps = " << M << std::endl;
-    std::cout << "Optimal wo = " << std::endl;
-    for (int n = 0; n < M; ++n)
-    std::cerr << wo_i[n] << std::endl;
+    // std::cout << "Optimal wo = " << std::endl;
+    // for (int n = 0; n < M; ++n)
+    // std::cerr << wo_i[n] << std::endl;
     std::cout << "Estimated w = " << std::endl;
     for (int n = 0; n < M; ++n)
     std::cerr << w_new[n] << std::endl;
@@ -188,12 +243,12 @@ for (size_t i = 0; i < iterations; ++i)
     std::ostream_iterator<double> output_iterator_MSE_galms(output_MSE_galms, "\n");
     std::copy(MSE_galms_avg.begin(), MSE_galms_avg.end(), output_iterator_MSE_galms);
 
-    std::ofstream output_EMSE_galms("./EMSE_galms.out"); //saving EMSE_galms vector
-    std::ostream_iterator<double> output_iterator_EMSE_galms(output_EMSE_galms, "\n");
-    std::copy(EMSE_galms_avg.begin(), EMSE_galms_avg.end(), output_iterator_EMSE_galms);
+    // std::ofstream output_EMSE_galms("./EMSE_galms.out"); //saving EMSE_galms vector
+    // std::ostream_iterator<double> output_iterator_EMSE_galms(output_EMSE_galms, "\n");
+    // std::copy(EMSE_galms_avg.begin(), EMSE_galms_avg.end(), output_iterator_EMSE_galms);
 
-    std::ofstream output_EMSE_theory("./EMSE_theory.out"); //saving EMSE_theory bound
-    output_EMSE_theory << EMSE_theory << '\n';
+    // std::ofstream output_EMSE_theory("./EMSE_theory.out"); //saving EMSE_theory bound
+    // output_EMSE_theory << EMSE_theory << '\n';
 
     std::ofstream output_MSE_theory("./MSE_theory.out"); //saving MSE_theory bound
     output_MSE_theory << MSE_theory << '\n';
