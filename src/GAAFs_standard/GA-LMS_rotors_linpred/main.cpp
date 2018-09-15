@@ -47,7 +47,8 @@ int main(int argc, char* argv[])
 
 
     // Loading data
-    std::ifstream file("/home/wilder/dev/OpenGA/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv");
+    // std::ifstream file("/home/wilder/dev/OpenGA/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv");
+    std::ifstream file("/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv");
 
     for(int row = -1; row < n_rows; ++row)
     {
@@ -71,7 +72,6 @@ int main(int argc, char* argv[])
               // strings doesn't happen.
               // if ( !iss.good() )
               //     break;
-
               std::stringstream convertor(val);
               convertor >> data[row][col];
             }
@@ -135,33 +135,41 @@ for (size_t j = 0; j < realizations; ++j)
     std::vector<double> MSE_galms;
     // std::vector<double> EMSE_galms;
 
-for (size_t i = 0; i < iterations; ++i)
+    for (int n=0; n < M; n++) //populating the arrays - regressor and noise
     {
+      w_old.at(n) = w_old_entry;
+      w_new.at(n) = w_new_entry;
+    }
 
+    for (size_t i = 0; i < iterations; ++i)
+    {
         for (int n=i; n < (i + M); n++) //populating the arrays - regressor and noise
         {
-            for (size_t j = 0; j < 4; ++j)
+            // std::cout << "n = " << n << std::endl;
+            for (size_t jj = 0; jj < 4; ++jj)
             {
-                x[j] = data[n][j]
+                x[jj] = data[n][jj];
                 // x[j] = normaldist(u);
                 //v[j] = normaldist(u); // generates normally distributed samples for noise
             }
-            u_i.at(n)  = x;
-            w_old.at(n) = w_old_entry;
-            w_new.at(n) = w_new_entry;
+            u_i.at(n-i) = x;
+            // std::cout << "x = " << x << std::endl;
         }
-        Ui = data[i+M];
+        for (size_t jk = 0; jk < 4; ++jk)
+        {
+            Ui[jk] = data[i+M][jk];
+        }
 
-        std::cout << "Ui = " << Ui << std::endl;
+        // std::cout << "Ui = " << Ui << std::endl;
 
         // Desirable output
-        for (size_t j = 0; j < 4; ++j)
+        for (size_t jkk = 0; jkk < 4; ++jkk)
         {
-            v[j] = normaldist(u); // generates normally distributed samples for noise
+            v[jkk] = normaldist(u); // generates normally distributed samples for noise
         }
         d = Ui + sqrt(var_v)*v;
 
-        std::cout << "d = " << d << std::endl;
+        // std::cout << "d = " << d << std::endl;
 
         //GA-LMS
         error_galms = (double) eval(magnitude(d - array_prod(reverse_array(u_i),w_old)));
@@ -213,6 +221,7 @@ for (size_t i = 0; i < iterations; ++i)
 
     for (size_t r = 0; r < iterations; ++r)
     {
+        std::cout << "MSE_galms[r] = " << MSE_galms[r] << std::endl;
 
         MSE_galms_avg[r] = MSE_galms_avg[r] + MSE_galms[r]/realizations;
         // EMSE_galms_avg[r] = EMSE_galms_avg[r] + EMSE_galms[r]/realizations;
@@ -220,6 +229,7 @@ for (size_t i = 0; i < iterations; ++i)
     }
 
     w_avg = array_sum(w_avg,array_prod((1/realizations),w_new)); // averaging estimated w
+
 }
 
 
@@ -237,6 +247,7 @@ for (size_t i = 0; i < iterations; ++i)
     std::cout << "w averaged over realizations = " << std::endl;
     for (int n = 0; n < M; ++n)
     std::cerr << w_avg[n] << std::endl;
+
 
     // SAVING ==============================================================================
     std::ofstream output_MSE_galms("./MSE_galms.out"); //saving MSE_galms vector
