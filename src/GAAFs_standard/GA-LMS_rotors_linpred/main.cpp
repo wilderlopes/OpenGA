@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     double var_q = 0; // random walk variance
     double corr_input = 0.95; // level of correlation between input entries
     int M = 4; //number of taps
-    int n_rows = 474;
+    int n_rows = 900;
     int n_cols = 4;
     double data[n_rows][n_cols];
 
@@ -162,12 +162,16 @@ for (size_t j = 0; j < realizations; ++j)
             u_i.at(n-i) = x;
             // std::cout << "x = " << x << std::endl;
         }
+        std::cout << "u_i = " << std::endl;
+        for (int nn = 0; nn < M; ++nn)
+        std::cerr << u_i[nn] << std::endl;
+
         for (size_t jk = 0; jk < 4; ++jk)
         {
             Ui[jk] = data[i+M][jk];
         }
 
-        // std::cout << "Ui = " << Ui << std::endl;
+        std::cout << "Ui = " << Ui << std::endl;
 
         // Desirable output
         for (size_t jkk = 0; jkk < 4; ++jkk)

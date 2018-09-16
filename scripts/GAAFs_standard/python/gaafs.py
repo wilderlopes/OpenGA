@@ -59,13 +59,13 @@ from matplotlib.backends.backend_pdf import PdfPages
 #
 # Measurement Noise variance: sigma2v
 
-M       = 10 # System order
+M       = 5 # System order
 L       = 1 # Realizations
-N       = 460 # Time iterations
-mu      = 1e-7 # AF Step size
+N       = 100 # Time iterations
+mu      = 1e-10 # AF Step size
 sigma2v = 1e-10 # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
-corr_input = 0.95 # Level of correlation between input's entries.
+corr_input = 0 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS_rotors_linpred' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
