@@ -51,7 +51,7 @@ elif action == 'refine':
 
 
     df = df[constants.COLS_FOR_SIM]
-    df['mock'] = 1.5*df['ROLL']
+    df['mock'] = -1.5*df['ROLL']
     df = df.drop([constants.TRUEAIRSPEED], axis=1)
     df = df[['mock', constants.ROLL, constants.PITCH, constants.YAW]]
     print(df.head())

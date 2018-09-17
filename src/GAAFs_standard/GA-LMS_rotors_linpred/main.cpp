@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     double var_q = 0; // random walk variance
     double corr_input = 0.95; // level of correlation between input entries
     int M = 4; //number of taps
-    int n_rows = 10000;
+    int n_rows = 20000;
     int n_cols = 4;
     double data[n_rows][n_cols];
 

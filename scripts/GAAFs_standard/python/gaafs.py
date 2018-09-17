@@ -61,8 +61,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 M       = 5 # System order
 L       = 1 # Realizations
-N       = 2000 # Time iterations
-mu      = 1e-7 # AF Step size
+N       = 3000 # Time iterations
+mu      = 1e-6 # AF Step size
 sigma2v = 1e-10 # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
 corr_input = 0 # Level of correlation between input's entries.
@@ -159,6 +159,7 @@ blades = [0, 3, 5, 6]
 cols = ['mock', 'ROLL', 'PIT', 'YAW']
 dic = dict(zip(blades, cols))
 
+plt.figure(figsize=(13.69,8.27))
 plt.title('y curves - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
           mu, sigma2v, sigma2q, corr_input), fontsize=9)
 plt.ylabel('EMSE (dB)')
@@ -170,10 +171,11 @@ for i in range(len(blades)):
     for line in f1:
         data1_list.append(line.rstrip('\n'))
     data1 = [float(j) for j in data1_list] # Converts to float
-    plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=1.5)
-    plt.plot(data1, label = 'y_galms_{}_pred'.format(blades[i]), linestyle=':', color='red', marker='+', markersize=0.5, linewidth=2)
-plt.legend()
+    plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    plt.plot(data1, label = 'y_galms_{}_pred'.format(blades[i]), linestyle=':', color='magenta', marker='+', markersize=0.6, linewidth=1)
+# plt.legend()
+plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 #plt.savefig('EMSE.png', bbox_inches='tight')
 pp.savefig()
-
+plt.close()
 pp.close()
