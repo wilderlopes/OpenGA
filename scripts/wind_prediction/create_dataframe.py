@@ -46,25 +46,31 @@ elif action == 'refine':
 
     df_master = df_master[constants.COLS_FOR_SIM]
     print(df_master.head())
-    df = df_master[:10000].reset_index()
+    df = df_master[6000:10000].reset_index()
+    # input()
+
+
+    df = df[constants.COLS_FOR_SIM]
+    df['mock'] = 1.5*df['ROLL']
+    df = df.drop([constants.TRUEAIRSPEED], axis=1)
+    df = df[['mock', constants.ROLL, constants.PITCH, constants.YAW]]
     print(df.head())
-    input()
-
+    print(df.columns)
     print('len(df) = {}'.format(len(df)))
-
-    df[constants.COLS_FOR_SIM].to_csv('../../data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv')
+    input()
+    df.to_csv('../../data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv')
     # Plotting
     # pd.scatter_matrix(df[constants.COLS_FOR_SIM])
     #
     fig = plt.figure()
-    for col in constants.COLS_FOR_SIM[1:]:
+    for col in df.columns[1:]:
         plt.plot(df.index.values, df[col].values, label=col)
     plt.legend()
     # plt.plot(df.index.values, df[constants.NS_HORZ_WINDSPEED].values, color='b', label=constants.NS_HORZ_WINDSPEED)
     # plt.plot(df.index.values, df[constants.VERT_WINDSPEED].values, color='red', label=constants.VERT_WINDSPEED)
 
     fig = plt.figure()
-    for col in [constants.COLS_FOR_SIM[0]]:
+    for col in [df.columns[0]]:
         plt.plot(df.index.values, df[col].values, label=col)
     plt.legend()
 

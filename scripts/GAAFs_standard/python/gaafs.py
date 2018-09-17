@@ -61,8 +61,8 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 M       = 5 # System order
 L       = 1 # Realizations
-N       = 100 # Time iterations
-mu      = 1e-10 # AF Step size
+N       = 2000 # Time iterations
+mu      = 1e-7 # AF Step size
 sigma2v = 1e-10 # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
 corr_input = 0 # Level of correlation between input's entries.
@@ -148,4 +148,32 @@ pp.savefig()
 #plt.show()
 
 plt.close()
+
+
+
+# Comparison d versus y
+import pandas as pd
+df = pd.read_csv('/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv')
+colors = ['red', 'blue', 'green', 'black']
+blades = [0, 3, 5, 6]
+cols = ['mock', 'ROLL', 'PIT', 'YAW']
+dic = dict(zip(blades, cols))
+
+plt.title('y curves - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
+          mu, sigma2v, sigma2q, corr_input), fontsize=9)
+plt.ylabel('EMSE (dB)')
+plt.xlabel('Iterations')
+for i in range(len(blades)):
+    f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
+    data_label1 = ['y_galms_{}'.format(blades[i])]
+    data1_list = []
+    for line in f1:
+        data1_list.append(line.rstrip('\n'))
+    data1 = [float(j) for j in data1_list] # Converts to float
+    plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=1.5)
+    plt.plot(data1, label = 'y_galms_{}_pred'.format(blades[i]), linestyle=':', color='red', marker='+', markersize=0.5, linewidth=2)
+plt.legend()
+#plt.savefig('EMSE.png', bbox_inches='tight')
+pp.savefig()
+
 pp.close()
