@@ -63,7 +63,7 @@ M       = 5 # System order
 L       = 1 # Realizations
 N       = 1200 # Time iterations
 mu      = 1e-9 # AF Step size
-sigma2v = 1e-10 # Variance of measurement noise
+sigma2v = 1e-15 # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
 corr_input = 0 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS_rotors_linpred' # Note that you can call any of the following binaries:
@@ -154,7 +154,7 @@ plt.close()
 # Comparison d versus y
 import pandas as pd
 df = pd.read_csv('/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv')
-colors = ['red', 'blue', 'green', 'black']
+colors = ['orange', 'blue', 'green', 'black']
 blades = [0, 3, 5, 6]
 # cols = ['mock', 'ROLL', 'PIT', 'YAW']
 cols = ['Q', 'U', 'V', 'W']
@@ -173,7 +173,7 @@ for i in range(1):
         data1_list.append(line.rstrip('\n'))
     data1 = [float(j) for j in data1_list] # Converts to float
     plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
-    plt.plot(data1, label = 'y_galms_{}_pred'.format(blades[i]), linestyle=':', color='magenta', marker='+', markersize=0.6, linewidth=1)
+    plt.plot(data1[3:], label = 'y_galms_{}_pred'.format(blades[i]), linestyle='--', color='magenta', marker='+', markersize=0.8, linewidth=1)
 # plt.legend()
 plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 #plt.savefig('EMSE.png', bbox_inches='tight')
@@ -194,7 +194,7 @@ for i in range(1, len(blades)):
         data1_list.append(line.rstrip('\n'))
     data1 = [float(j) for j in data1_list] # Converts to float
     plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
-    plt.plot(data1, label = 'y_galms_{}_pred'.format(blades[i]), linestyle=':', color='magenta', marker='+', markersize=0.6, linewidth=1)
+    plt.plot(data1[3:], label = 'y_galms_{}_pred'.format(blades[i]), linestyle='--', color='magenta', marker='+', markersize=0.8, linewidth=1)
 # plt.legend()
 plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 #plt.savefig('EMSE.png', bbox_inches='tight')
