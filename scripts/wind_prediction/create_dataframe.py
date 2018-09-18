@@ -46,14 +46,17 @@ elif action == 'refine':
 
     df_master = df_master[constants.COLS_FOR_SIM]
     print(df_master.head())
-    df = df_master[6000:10000].reset_index()
+    df = df_master[10000:16000].reset_index()
     # input()
 
 
+    # resample from 20Hz to 5Hz
+    df = df.iloc[::4, :]
+    df = df.reset_index()
     df = df[constants.COLS_FOR_SIM]
-    df['mock'] = -1.5*df['ROLL']
-    df = df.drop([constants.TRUEAIRSPEED], axis=1)
-    df = df[['mock', constants.ROLL, constants.PITCH, constants.YAW]]
+    # df['mock'] = -1.5*df['ROLL']
+    # df = df.drop([constants.TRUEAIRSPEED], axis=1)
+    # df = df[['mock', constants.ROLL, constants.PITCH, constants.YAW]]
     print(df.head())
     print(df.columns)
     print('len(df) = {}'.format(len(df)))
