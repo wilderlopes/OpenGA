@@ -10,7 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import common.constants as constants
 from matplotlib.lines import Line2D
 
-custom_lines = [Line2D([0], [0], color='magenta', linestyle='--', lw=2)]
+custom_lines = [Line2D([0], [0], color='magenta', linestyle='--', lw=1)]
 
 # Line2D([0], [0], color='blue', lw=2),
 #                 Line2D([0], [0], color='green', lw=2),
@@ -123,21 +123,28 @@ plt.close()
 
 
 # Comparison d versus y
+width  = 6 #3.487
+height = width / 1.618
+size_annotation = 6
+size_legend = 6
 
 df = pd.read_csv('/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv')
 colors = ['orange', 'blue', 'green', 'black']
 blades = [0, 3, 5, 6]
-# blades = []
 cols = constants.COLS_FOR_SIM
 dic = dict(zip(blades, cols))
+start_plot = 3 # sample where plotting should start (useful to discard the first
+# samples where the AF is reaching the signal to be tracked).
 
+fig, [ax1, ax2] = plt.subplots(2, 1, sharex=True)
 # plt.figure(figsize=(13.69,8.27))
-plt.figure(figsize=(6, 3.5))
-# plt.figure()
+# plt.figure(figsize=(6, 3.5))
 # plt.title('y curves - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
 #           mu, sigma2v, sigma2q, corr_input), fontsize=9)
-plt.ylabel('mbar')
-plt.xlabel('Iterations')
+# plt.ylabel('mbar')
+# plt.xlabel('Iterations')
+ax1.set_ylabel('mbar')
+# ax1.set_xlabel('Iterations')
 for i in range(1):
     f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
     # data_label1 = ['y_galms_{}'.format(blades[i])]
@@ -145,24 +152,15 @@ for i in range(1):
     for line in f1:
         data1_list.append(line.rstrip('\n'))
     data1 = [float(j) for j in data1_list] # Converts to float
-    plt.scatter(range(len(data1)), df[dic[blades[i]]].values[:len(data1)], label = 'actual_{}'.format(dic[blades[i]]), color=colors[i], s=3)
+    range_plot = range(len(data1)-start_plot)
+    ax1.scatter(range_plot, df[dic[blades[i]]].values[start_plot:len(data1)], label = 'actual_{}'.format(dic[blades[i]]), color=colors[i], s=1)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
-    plt.plot(data1[3:], label = 'predicted_{}'.format(dic[blades[i]]), linestyle='--', color='magenta', linewidth=1.5)
-plt.legend(loc='upper left')
-# plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-#            ncol=2, mode="expand", borderaxespad=0.)
-# plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-#plt.savefig('EMSE.png', bbox_inches='tight')
-pp.savefig()
-plt.close()
+    ax1.plot(range_plot, data1[start_plot:], label = 'predicted_{}'.format(dic[blades[i]]), linestyle='--', color='magenta', linewidth=1.5)
+ax1.legend(custom_lines, ['predicted'], loc=2, prop={'size': size_legend})
+ax1.annotate('Dynamic_Pressure', xy=(1000, 14400), size=size_annotation)
 
-
-plt.figure(figsize=(6, 4.0))
-# plt.figure()
-# plt.title('y curves - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
-#           mu, sigma2v, sigma2q, corr_input), fontsize=9)
-plt.ylabel('m/s')
-plt.xlabel('Iterations')
+ax2.set_ylabel('m/s')
+ax2.set_xlabel('Iterations')
 for i in range(1, len(blades)):
     f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
     # data_label1 = ['y_galms_{}'.format(blades[i])]
@@ -170,19 +168,58 @@ for i in range(1, len(blades)):
     for line in f1:
         data1_list.append(line.rstrip('\n'))
     data1 = [float(j) for j in data1_list] # Converts to float
-    plt.scatter(range(len(data1)), df[dic[blades[i]]].values[:len(data1)], label = 'actual_{}'.format(dic[blades[i]]), color=colors[i], s=3)
-    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
-    plt.plot(data1[3:], label = 'predicted_{}'.format(dic[blades[i]]), linestyle='--', color='magenta', linewidth=1.5)
+    range_plot = range(len(data1)-start_plot)
+    ax2.scatter(range_plot, df[dic[blades[i]]].values[start_plot:len(data1)], label = 'actual_{}'.format(dic[blades[i]]), color=colors[i], s=1)
+    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    ax2.plot(range_plot, data1[start_plot:], label = 'predicted_{}'.format(dic[blades[i]]), linestyle='--', color='magenta', linewidth=1.5)
+ax2.annotate('NorthSouth_Wind', xy=(50, 1600), size=size_annotation)
+ax2.annotate('EastWest_Wind', xy=(50, 1000), size=size_annotation)
+ax2.annotate('Vertical_Wind', xy=(50, 300), size=size_annotation)
+fig.set_size_inches(width, height)
+pp.savefig()
+plt.close()
 
-plt.annotate('V', xy=(50, 1400))
-plt.annotate('U', xy=(50, 900))
-plt.annotate('W', xy=(50, 300))
-plt.legend(custom_lines, ['predicted'], loc=2)
-# plt.legend(custom_lines, ['actual_{}'.format(col) for col in cols[1:]] + ['pred'], loc=(0.6, 0.3))
-# plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-# plt.legend(custom_lines, ['actual_{}'.format(col) for col in cols[1:]], bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-#            ncol=2, mode="expand", borderaxespad=0.)
-#plt.savefig('EMSE.png', bbox_inches='tight')
+# Zoomed in figures
+zoom_range_start = 1200
+zoom_range_end = 1500
+fig, [ax1, ax2] = plt.subplots(1, 2)
+ax1.set_ylabel('mbar')
+ax1.set_xlabel('Iterations')
+for i in [0]:
+    f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
+    # data_label1 = ['y_galms_{}'.format(blades[i])]
+    data1_list = []
+    for line in f1:
+        data1_list.append(line.rstrip('\n'))
+    data1 = [float(j) for j in data1_list] # Converts to float
+    data1 = data1[zoom_range_start:zoom_range_end]
+    ax1.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1)
+    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    ax1.plot(range(zoom_range_start, zoom_range_end), data1, label = 'Predicted', linestyle='--', color='magenta', linewidth=1.5)
+ax1.annotate('Dynamic_Pressure', xy=(1350, 14970), size=size_annotation)
+ax1.legend(prop={'size': size_legend})
+# ax1.legend(custom_lines, ['predicted'], loc='lower left')
+
+ax2.set_ylabel('m/s')
+ax2.set_xlabel('Iterations')
+for i in [3]:
+    f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
+    # data_label1 = ['y_galms_{}'.format(blades[i])]
+    data1_list = []
+    for line in f1:
+        data1_list.append(line.rstrip('\n'))
+    data1 = [float(j) for j in data1_list] # Converts to float
+    data1 = data1[zoom_range_start:zoom_range_end]
+    ax2.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1)
+    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
+    ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'Predicted', linestyle='--', color='magenta', linewidth=1.5)
+ax2.annotate('Vertical_Wind', xy=(1200, 115), size=size_annotation)
+ax2.legend(prop={'size': size_legend})
+# ax3.annotate('NorthSouth_Wind', xy=(50, 1600))
+# ax3.annotate('EastWest_Wind', xy=(50, 1000))
+# ax3.annotate('Vertical_Wind', xy=(50, 300))
+fig.set_size_inches(width, 0.7*height)
+plt.tight_layout()
 pp.savefig()
 plt.close()
 pp.close()
