@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     double corr_input = 0.95; // level of correlation between input entries
     int M = 4; //number of taps
     int n_rows = 20000;
-    int n_cols = 4;
+    int n_cols = 8;
     double data[n_rows][n_cols];
 
     std::stringstream str_M(argv[1]);
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     str_corr_input >> corr_input;
 
     // Loading data
-    std::ifstream file("/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS_rotors.csv");
+    std::ifstream file("/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS_complete.csv");
 
     for(int row = -1; row < n_rows; ++row)
     {
@@ -97,16 +97,14 @@ int main(int argc, char* argv[])
     }
 
 
-
-
     // Initializing multivectors in gaalet
-    mvType x{0, 0, 0, 0};
-    mvType d{0, 0, 0, 0};
-    mvType y{0, 0, 0, 0};
-    mvType v{0, 0, 0, 0};
-    mvType w_old_entry{0, 0, 0, 0};
-    mvType w_new_entry{0, 0, 0, 0};
-    mvType Ui{0, 0, 0, 0};
+    mvType x{0, 0, 0, 0, 0, 0, 0, 0};
+    mvType d{0, 0, 0, 0, 0, 0, 0, 0};
+    mvType y{0, 0, 0, 0, 0, 0, 0, 0};
+    mvType v{0, 0, 0, 0, 0, 0, 0, 0};
+    mvType w_old_entry{0, 0, 0, 0, 0, 0, 0, 0};
+    mvType w_new_entry{0, 0, 0, 0, 0, 0, 0, 0};
+    mvType Ui{0, 0, 0, 0, 0, 0, 0, 0};
 
     //Inititalizing arrays of multivectors
     std::vector<mvType> u_i; //Array of regressors
@@ -128,18 +126,26 @@ int main(int argc, char* argv[])
     // std::vector<double> EMSE_galms_avg;
     // std::vector<double[iterations]> y_galms_avg;
     std::vector<double> y_galms_avg_0;
+    std::vector<double> y_galms_avg_1;
+    std::vector<double> y_galms_avg_2;
+    std::vector<double> y_galms_avg_4;
     std::vector<double> y_galms_avg_3;
     std::vector<double> y_galms_avg_5;
     std::vector<double> y_galms_avg_6;
+    std::vector<double> y_galms_avg_7;
 
     // Resizing the following vectors to allocate memmory. Otherwise
     // a 'segmentation fault'
     MSE_galms_avg.resize(iterations);
     // EMSE_galms_avg.resize(iterations);
     y_galms_avg_0.resize(iterations);
+    y_galms_avg_1.resize(iterations);
+    y_galms_avg_2.resize(iterations);
+    y_galms_avg_4.resize(iterations);
     y_galms_avg_3.resize(iterations);
     y_galms_avg_5.resize(iterations);
     y_galms_avg_6.resize(iterations);
+    y_galms_avg_7.resize(iterations);
 
 for (size_t j = 0; j < realizations; ++j)
 {
@@ -151,9 +157,13 @@ for (size_t j = 0; j < realizations; ++j)
     // std::vector<double> EMSE_galms;
     // std::vector<double[iterations]> y_galms;
     std::vector<double> y_galms_0;
+    std::vector<double> y_galms_1;
+    std::vector<double> y_galms_2;
+    std::vector<double> y_galms_4;
     std::vector<double> y_galms_3;
     std::vector<double> y_galms_5;
     std::vector<double> y_galms_6;
+    std::vector<double> y_galms_7;
 
     for (int n=0; n < M; n++) //populating the arrays - regressor and noise
     {
@@ -166,7 +176,7 @@ for (size_t j = 0; j < realizations; ++j)
         for (int n=i; n < (i + M); n++) //populating the arrays - regressor and noise
         {
             // std::cout << "n = " << n << std::endl;
-            for (size_t jj = 0; jj < 4; ++jj)
+            for (size_t jj = 0; jj < n_cols; ++jj)
             {
                 x[jj] = data[n][jj];
                 // x[j] = normaldist(u);
@@ -179,7 +189,7 @@ for (size_t j = 0; j < realizations; ++j)
         for (int nn = 0; nn < M; ++nn)
         std::cerr << u_i[nn] << std::endl;
 
-        for (size_t jk = 0; jk < 4; ++jk)
+        for (size_t jk = 0; jk < n_cols; ++jk)
         {
             Ui[jk] = data[i+M][jk];
         }
@@ -187,7 +197,7 @@ for (size_t j = 0; j < realizations; ++j)
         std::cout << "Ui = " << Ui << std::endl;
 
         // Desirable output
-        for (size_t jkk = 0; jkk < 4; ++jkk)
+        for (size_t jkk = 0; jkk < n_cols; ++jkk)
         {
             v[jkk] = normaldist(u); // generates normally distributed samples for noise
         }
@@ -197,8 +207,8 @@ for (size_t j = 0; j < realizations; ++j)
 
         //GA-LMS
         y = array_prod(reverse_array(u_i),w_old);
-        std::cout << "y = " << y << std::endl;
-        std::cout << "y[3] = " << y[3] << std::endl;
+        // std::cout << "y = " << y << std::endl;
+        // std::cout << "y[3] = " << y[3] << std::endl;
         // std::cout << "grade(y) = " << grade<0>(y) << std::endl;
 
         error_galms = (double) eval(magnitude(d - y));
@@ -207,9 +217,13 @@ for (size_t j = 0; j < realizations; ++j)
         MSE_galms.push_back(pow(error_galms,2)); // .push_back shifts the previous content of the vector
         // y_galms.push_back(y[]);
         y_galms_0.push_back(y[0]);
-        y_galms_3.push_back(y[1]);
-        y_galms_5.push_back(y[2]);
-        y_galms_6.push_back(y[3]);
+        y_galms_1.push_back(y[1]);
+        y_galms_2.push_back(y[2]);
+        y_galms_4.push_back(y[3]);
+        y_galms_3.push_back(y[4]);
+        y_galms_5.push_back(y[5]);
+        y_galms_6.push_back(y[6]);
+        y_galms_7.push_back(y[7]);
         // EMSE_galms.push_back(pow(emse_galms,2)); // .push_back shifts the previous content of the vector
         //MSD_galms.push_back(10*log10(pow(msd_galms,2))); // .push_back shifts the previous content of the vector
         w_new = array_sum(w_old,array_prod(mu_galms,array_prod(u_i,(d - array_prod(reverse_array(u_i),w_old)))));
@@ -260,9 +274,13 @@ for (size_t j = 0; j < realizations; ++j)
         MSE_galms_avg[r] = MSE_galms_avg[r] + MSE_galms[r]/realizations;
         // EMSE_galms_avg[r] = EMSE_galms_avg[r] + EMSE_galms[r]/realizations;
         y_galms_avg_0[r] = y_galms_avg_0[r] + y_galms_0[r]/realizations;
+        y_galms_avg_1[r] = y_galms_avg_1[r] + y_galms_1[r]/realizations;
+        y_galms_avg_2[r] = y_galms_avg_2[r] + y_galms_2[r]/realizations;
+        y_galms_avg_4[r] = y_galms_avg_4[r] + y_galms_4[r]/realizations;
         y_galms_avg_3[r] = y_galms_avg_3[r] + y_galms_3[r]/realizations;
         y_galms_avg_5[r] = y_galms_avg_5[r] + y_galms_5[r]/realizations;
         y_galms_avg_6[r] = y_galms_avg_6[r] + y_galms_6[r]/realizations;
+        y_galms_avg_7[r] = y_galms_avg_7[r] + y_galms_7[r]/realizations;
 
     }
 
@@ -271,8 +289,8 @@ for (size_t j = 0; j < realizations; ++j)
 }
 
 
-    MSE_theory  = (4*var_v) + mu_galms*(M*4)*(4*var_v)/(2-mu_galms*(M*4));
-    // EMSE_theory = mu_galms*(M*4)*(4*var_v)/(2-mu_galms*(M*4));
+    MSE_theory  = (8*var_v) + mu_galms*(M*8)*(8*var_v)/(2-mu_galms*(M*8));
+    EMSE_theory = mu_galms*(M*8)*(8*var_v)/(2-mu_galms*(M*8));
 
     std::cout << "Iterations = " << iterations << std::endl;
     std::cout << "Number of taps = " << M << std::endl;
@@ -296,6 +314,18 @@ for (size_t j = 0; j < realizations; ++j)
     std::ostream_iterator<double> output_iterator_y_galms_0(output_y_galms_0, "\n");
     std::copy(y_galms_avg_0.begin(), y_galms_avg_0.end(), output_iterator_y_galms_0);
 
+    std::ofstream output_y_galms_1("./y_galms_1.out"); //saving y_galms_0 vector
+    std::ostream_iterator<double> output_iterator_y_galms_1(output_y_galms_1, "\n");
+    std::copy(y_galms_avg_1.begin(), y_galms_avg_1.end(), output_iterator_y_galms_1);
+
+    std::ofstream output_y_galms_2("./y_galms_2.out"); //saving y_galms_0 vector
+    std::ostream_iterator<double> output_iterator_y_galms_2(output_y_galms_2, "\n");
+    std::copy(y_galms_avg_2.begin(), y_galms_avg_2.end(), output_iterator_y_galms_2);
+
+    std::ofstream output_y_galms_4("./y_galms_4.out"); //saving y_galms_0 vector
+    std::ostream_iterator<double> output_iterator_y_galms_4(output_y_galms_4, "\n");
+    std::copy(y_galms_avg_4.begin(), y_galms_avg_4.end(), output_iterator_y_galms_4);
+
     std::ofstream output_y_galms_3("./y_galms_3.out"); //saving y_galms_0 vector
     std::ostream_iterator<double> output_iterator_y_galms_3(output_y_galms_3, "\n");
     std::copy(y_galms_avg_3.begin(), y_galms_avg_3.end(), output_iterator_y_galms_3);
@@ -307,6 +337,10 @@ for (size_t j = 0; j < realizations; ++j)
     std::ofstream output_y_galms_6("./y_galms_6.out"); //saving y_galms_0 vector
     std::ostream_iterator<double> output_iterator_y_galms_6(output_y_galms_6, "\n");
     std::copy(y_galms_avg_6.begin(), y_galms_avg_6.end(), output_iterator_y_galms_6);
+
+    std::ofstream output_y_galms_7("./y_galms_7.out"); //saving y_galms_0 vector
+    std::ostream_iterator<double> output_iterator_y_galms_7(output_y_galms_7, "\n");
+    std::copy(y_galms_avg_7.begin(), y_galms_avg_7.end(), output_iterator_y_galms_7);
 
     // std::ofstream output_EMSE_galms("./EMSE_galms.out"); //saving EMSE_galms vector
     // std::ostream_iterator<double> output_iterator_EMSE_galms(output_EMSE_galms, "\n");
