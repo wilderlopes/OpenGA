@@ -11,7 +11,6 @@ import common.constants as constants
 from matplotlib.lines import Line2D
 
 custom_lines = [Line2D([0], [0], color='magenta', linestyle='--', lw=1)]
-
 # Line2D([0], [0], color='blue', lw=2),
 #                 Line2D([0], [0], color='green', lw=2),
 #                 Line2D([0], [0], color='black', lw=2),
@@ -120,8 +119,6 @@ plt.close()
 #
 # plt.close()
 
-
-
 # Comparison d versus y
 width  = 6 #3.487
 height = width / 1.618
@@ -138,17 +135,9 @@ start_plot = 3 # sample where plotting should start (useful to discard the first
 # samples where the AF is reaching the signal to be tracked).
 
 fig, [ax1, ax2] = plt.subplots(2, 1, sharex=True)
-# plt.figure(figsize=(13.69,8.27))
-# plt.figure(figsize=(6, 3.5))
-# plt.title('y curves - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
-#           mu, sigma2v, sigma2q, corr_input), fontsize=9)
-# plt.ylabel('mbar')
-# plt.xlabel('Iterations')
 ax1.set_ylabel('mbar')
-# ax1.set_xlabel('Iterations')
-for i in range(1):
+for i in [0]:
     f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
-    # data_label1 = ['y_galms_{}'.format(blades[i])]
     data1_list = []
     for line in f1:
         data1_list.append(line.rstrip('\n'))
@@ -164,7 +153,6 @@ ax2.set_ylabel('m/s')
 ax2.set_xlabel('Iterations')
 for i in range(1, len(blades)):
     f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
-    # data_label1 = ['y_galms_{}'.format(blades[i])]
     data1_list = []
     for line in f1:
         data1_list.append(line.rstrip('\n'))
@@ -180,7 +168,7 @@ fig.set_size_inches(width, height)
 pp.savefig()
 plt.close()
 
-# Zoomed in figures
+# Zoomed-in figures
 zoom_range_start = 1200
 zoom_range_end = 1500
 fig, [ax1, ax2] = plt.subplots(1, 2)
@@ -188,7 +176,6 @@ ax1.set_ylabel('mbar')
 ax1.set_xlabel('Iterations')
 for i in [0]:
     f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
-    # data_label1 = ['y_galms_{}'.format(blades[i])]
     data1_list = []
     for line in f1:
         data1_list.append(line.rstrip('\n'))
@@ -205,7 +192,6 @@ ax2.set_ylabel('m/s')
 ax2.set_xlabel('Iterations')
 for i in [3]:
     f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
-    # data_label1 = ['y_galms_{}'.format(blades[i])]
     data1_list = []
     for line in f1:
         data1_list.append(line.rstrip('\n'))
@@ -216,12 +202,10 @@ for i in [3]:
     ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'Predicted', linestyle='--', color='magenta', linewidth=1.5)
 ax2.annotate('Vertical_Wind', xy=(1200, 115), size=size_annotation_zoom)
 ax2.legend(prop={'size': size_legend})
-# ax3.annotate('NorthSouth_Wind', xy=(50, 1600))
-# ax3.annotate('EastWest_Wind', xy=(50, 1000))
-# ax3.annotate('Vertical_Wind', xy=(50, 300))
 fig.set_size_inches(width, 0.7*height)
 plt.tight_layout()
 plt.subplots_adjust(wspace=0.4)
 pp.savefig()
 plt.close()
+
 pp.close()
