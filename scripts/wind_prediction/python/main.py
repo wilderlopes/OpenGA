@@ -125,7 +125,8 @@ plt.close()
 # Comparison d versus y
 width  = 6 #3.487
 height = width / 1.618
-size_annotation = 6
+size_annotation = 9
+size_annotation_zoom = 7
 size_legend = 6
 
 df = pd.read_csv('/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv')
@@ -156,7 +157,7 @@ for i in range(1):
     ax1.scatter(range_plot, df[dic[blades[i]]].values[start_plot:len(data1)], label = 'actual_{}'.format(dic[blades[i]]), color=colors[i], s=1)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
     ax1.plot(range_plot, data1[start_plot:], label = 'predicted_{}'.format(dic[blades[i]]), linestyle='--', color='magenta', linewidth=1.5)
-ax1.legend(custom_lines, ['predicted'], loc=2, prop={'size': size_legend})
+ax1.legend(custom_lines, ['Predicted'], loc=2, prop={'size': size_legend})
 ax1.annotate('Dynamic_Pressure', xy=(1000, 14400), size=size_annotation)
 
 ax2.set_ylabel('m/s')
@@ -196,7 +197,7 @@ for i in [0]:
     ax1.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
     ax1.plot(range(zoom_range_start, zoom_range_end), data1, label = 'Predicted', linestyle='--', color='magenta', linewidth=1.5)
-ax1.annotate('Dynamic_Pressure', xy=(1350, 14970), size=size_annotation)
+ax1.annotate('Dynamic_Pressure', xy=(1350, 14970), size=size_annotation_zoom)
 ax1.legend(prop={'size': size_legend})
 # ax1.legend(custom_lines, ['predicted'], loc='lower left')
 
@@ -213,13 +214,14 @@ for i in [3]:
     ax2.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
     ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'Predicted', linestyle='--', color='magenta', linewidth=1.5)
-ax2.annotate('Vertical_Wind', xy=(1200, 115), size=size_annotation)
+ax2.annotate('Vertical_Wind', xy=(1200, 115), size=size_annotation_zoom)
 ax2.legend(prop={'size': size_legend})
 # ax3.annotate('NorthSouth_Wind', xy=(50, 1600))
 # ax3.annotate('EastWest_Wind', xy=(50, 1000))
 # ax3.annotate('Vertical_Wind', xy=(50, 300))
 fig.set_size_inches(width, 0.7*height)
 plt.tight_layout()
+plt.subplots_adjust(wspace=0.4)
 pp.savefig()
 plt.close()
 pp.close()
