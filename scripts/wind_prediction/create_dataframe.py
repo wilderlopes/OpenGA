@@ -46,7 +46,7 @@ elif action == 'refine':
 
     df_master = df_master[constants.COLS_FOR_SIM]
     print(df_master.head())
-    df = df_master[10000:16000].reset_index()
+    df = df_master[10000:16100].reset_index()
     # input()
 
 

@@ -61,7 +61,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 M       = 5 # System order
 L       = 1 # Realizations
-N       = 1200 # Time iterations
+N       = 1500 # Time iterations
 mu      = 1e-9 # AF Step size
 sigma2v = 1e-15 # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
@@ -172,10 +172,13 @@ for i in range(1):
     for line in f1:
         data1_list.append(line.rstrip('\n'))
     data1 = [float(j) for j in data1_list] # Converts to float
-    plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
-    plt.plot(data1[3:], label = 'y_galms_{}_pred'.format(blades[i]), linestyle='--', color='magenta', marker='+', markersize=0.8, linewidth=1)
+    plt.scatter(range(len(data1)), df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], s=3)
+    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    plt.plot(data1[3:], label = 'y_galms_{}_pred'.format(blades[i]), linestyle='--', color='magenta', linewidth=2)
 # plt.legend()
-plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
+           ncol=2, mode="expand", borderaxespad=0.)
+# plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 #plt.savefig('EMSE.png', bbox_inches='tight')
 pp.savefig()
 plt.close()
@@ -193,10 +196,13 @@ for i in range(1, len(blades)):
     for line in f1:
         data1_list.append(line.rstrip('\n'))
     data1 = [float(j) for j in data1_list] # Converts to float
-    plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
-    plt.plot(data1[3:], label = 'y_galms_{}_pred'.format(blades[i]), linestyle='--', color='magenta', marker='+', markersize=0.8, linewidth=1)
+    plt.scatter(range(len(data1)), df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], s=3)
+    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
+    plt.plot(data1[3:], label = 'y_galms_{}_pred'.format(blades[i]), linestyle='--', color='magenta', linewidth=2)
 # plt.legend()
-plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+# plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
+           ncol=2, mode="expand", borderaxespad=0.)
 #plt.savefig('EMSE.png', bbox_inches='tight')
 pp.savefig()
 plt.close()
