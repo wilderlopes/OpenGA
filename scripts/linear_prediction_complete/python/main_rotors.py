@@ -133,7 +133,7 @@ x_start = 0
 x_end = 1500
 
 df = pd.read_csv('/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS_rotors.csv')
-colors = ['orange', 'blue', 'green', 'black']
+colors = [(0, 1, 0), 'blue', (0, 0.8, 0.8), 'black']
 blades = [0, 3, 5, 6]
 cols = constants.COLS_FOR_SIM_ROTORS
 dic = dict(zip(blades, cols))

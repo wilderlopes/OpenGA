@@ -138,8 +138,9 @@ from matplotlib.lines import Line2D
 cmap = plt.cm.RdYlBu
 colors = []
 for i in np.linspace(0.8, 1, 8):
-    colors.append(cmap(i))
-    # colors.append('orange')
+    # colors.append(cmap(i))
+    colors.append((0, 0.8, 0.9))
+    # colors.append((0, 0.9, 0.1))
 # colors = ['orange', 'blue', 'green', 'black', ]
 blades = [0, 1, 2, 4, 3, 5, 6, 7]
 cols = constants.COLS_FOR_SIM_COMPLETE
@@ -247,7 +248,7 @@ for i in [7]:
         data1_list.append(line.rstrip('\n'))
     data1 = [float(j) for j in data1_list] # Converts to float
     data1 = data1[zoom_range_start:zoom_range_end]
-    ax2.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=sizedot)
+    ax2.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1.3*sizedot)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
     ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'Predicted', linestyle='--', color='magenta', linewidth=linewidth)
 ax2.annotate('Angle_Of_Attack {{{}}}'.format(r"$\gamma_{123}$"), xy=(375, 69), size=size_annotation)
