@@ -61,12 +61,14 @@ int main(int argc, char* argv[])
 
     //Inititalizing arrays of multivectors
     std::vector<mvType> u_i; //Array of regressors
+    std::vector<mvType> u_i_old; //Array of regressors from past time instant
     std::vector<mvType> wo_i; //Array - plant model
     std::vector<mvType> w_old; //Array - weight vector (old)
     std::vector<mvType> w_new; //Array - weight vector (new)
     std::vector<mvType> w_avg; //Array - weight vector averaged over realizations
 
     u_i.resize(M);
+    u_i_old.resize(M);
     wo_i.resize(M);
     w_old.resize(M);
     w_new.resize(M);
@@ -96,6 +98,7 @@ for (size_t j = 0; j < realizations; ++j)
             x[j] = normaldist(u);
         }
         u_i.at(n)  = x;
+        u_i_old.at(n)  = x;
         wo_i.at(n) = wo;
         w_old.at(n) = w_old_entry;
         w_new.at(n) = w_new_entry;
@@ -107,16 +110,6 @@ for (size_t j = 0; j < realizations; ++j)
 
 for (size_t i = 0; i < iterations; ++i)
     {
-
-        // Correlated input - Auto-regressive (AR) Process
-       if (corr_input > 0)
-       {
-         // Building up the Regressor vector. Note that entry n=0 is left intact.
-         for (int n=1; n < M; n++)
-         {
-           u_i.at(n) = sqrt(1 - pow(corr_input, 2))*u_i.at(n) + corr_input*u_i.at(n-1);
-         }
-       }
 
         // Desirable output
         for (size_t j = 0; j < 8; ++j)
@@ -146,6 +139,8 @@ for (size_t i = 0; i < iterations; ++i)
 
         w_old = w_new;
 
+        u_i_old = u_i;
+
         /*
         //Regenerating regressor - shift register =================
         for (size_t j = 0; j < 8; ++j)
@@ -173,12 +168,23 @@ for (size_t i = 0; i < iterations; ++i)
             {
                 x[j] = normaldist(u);
             }
-            u_i.at(n)  = x;
+            u_i.at(n) = x;
         }
 
         //std::cout << "new regressor = " << std::endl;
         //for (int n = 0; n < M; ++n)
         //std::cerr << u_i[n] << std::endl;
+        //=========================================================
+
+        // Correlated input - Auto-regressive (AR) Process ========
+        if (corr_input > 0)
+        {
+          // Building up the Regressor vector. Note that entry n=0 is left intact.
+          for (int n=1; n < M; n++)
+          {
+            u_i.at(n) = sqrt(1 - pow(corr_input, 2))*u_i.at(n) + corr_input*u_i_old.at(n);
+          }
+        }
         //=========================================================
 
     }
