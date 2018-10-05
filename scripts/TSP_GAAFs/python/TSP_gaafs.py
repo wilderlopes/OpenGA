@@ -63,9 +63,9 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 width  = 6 #3.487
 height = width / 1.618
-size_annotation = 9
+size_annotation = 10
 size_annotation_zoom = 7
-size_legend = 9
+size_legend = 7
 sizedot = 5
 linewidth = 2
 
@@ -293,19 +293,19 @@ if not os.path.exists(savefolder):
 # pp.close()
 
 
-###########################################
-### Simulations to produce Fig. 5 (Top) Correlated input ###
-###########################################
-print('### Experiments for Fig 5 (Top) ###')
-pp = PdfPages(savefolder + '/TSP_GAAFs_Fig_5_Top.pdf') # multipage pdf to save figures
+############################################################################
+### Simulations to produce Fig. 5 (Top) Correlated Input and Random Walk ###
+############################################################################
+print('### Experiments for Fig 5 (Top) Correlated and Random Walk ###')
+pp = PdfPages(savefolder + '/TSP_GAAFs_Fig_5_Top_correlated_randomwalk.pdf') # multipage pdf to save figures
 
 M       = 10 # System order
 L       = 100 # Realizations
-N       = 3200 # Time iterations
+N       = 6000 # Time iterations
 mu      = 0.01 # AF Step size
 sigma2v = [1e-2, 1e-3, 1e-5] # Variance of measurement noise
-sigma2q = 1e-6 # Variance of random-walk noise
-corr_input = 0 # Level of correlation between input's entries.
+sigma2q = 0 # Variance of random-walk noise
+corr_input = 0.98 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
 		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
@@ -345,29 +345,100 @@ for sig in sigma2v:
     data_dic.update({'{}'.format(sig) : [data1_dB, data2_dB]})
 
 # Plot figures
-colors = ['blue', 'green', 'black']
+# colors = ['blue', 'green', 'black']
+cmap = plt.cm.RdYlBu
+colors = []
+for i in np.linspace(0.8, 1, 3):
+    colors.append(cmap(i))
 y_annotation = [-5, -28, -36]
 x_start = 0
 x_end = N
-fig = plt.figure()
-plt.title('EMSE curves - ' + BINARY + ' ' + r"$\mu={}, M={}$".format(mu, M))
-plt.ylabel('EMSE (dB)')
-plt.xlabel('Iterations')
+y_start = -50
+y_end = 40
+fig, [ax1, ax2] = plt.subplots(2, 1, sharex=True)
+# plt.title('EMSE curves - ' + BINARY + ' ' + r"$\mu={}, M={}$".format(mu, M))
+ax1.set_ylabel('EMSE (dB)')
+# ax1.set_xlabel('Iterations')
 data_dic_keys = data_dic.keys()
 dic_sigma2v = dict(zip(data_dic_keys, [r'$\sigma^2_v=10^{-2}$', r'$\sigma^2_v=10^{-3}$', r'$\sigma^2_v=10^{-5}$']))
 for i in range(len(data_dic_keys)):
     key = data_dic_keys[i]
-    plt.plot(data_dic[key][1], label = r'$\sigma^2_v={}$ (theory)'.format(key), color = 'magenta', linestyle = '--')
-    plt.plot(data_dic[key][0], label = r'$\sigma^2_v={}$'.format(key), color = 'blue')
-    plt.annotate("{}".format(dic_sigma2v[key]), xy=(2600, y_annotation[i]), size=size_annotation)
+    # ax1.plot(data_dic[key][1], label = r'$\sigma^2_v={}$ (theory)'.format(key), color = 'magenta', linestyle = '--')
+    ax1.plot(data_dic[key][0], label = "{}".format(dic_sigma2v[key]), color = colors[i])
+    # ax1.annotate("{}".format(dic_sigma2v[key]), xy=(2600, y_annotation[i]), size=size_annotation)
+ax1.annotate("b = {}".format(corr_input), xy=(500, 25), size=size_annotation)
+ax1.annotate(r"$\sigma^2_q = {}$".format(sigma2q), xy=(500, 10), size=size_annotation)
+ax1.annotate("{:.2f} dB".format(data_dic[key][0][-1]), xy=(5990, data_dic[key][0][-1]), xytext=(4200, data_dic[key][0][-1] - 10), arrowprops=dict(facecolor='red', color='red', width=1, headwidth=4, shrink=0.05), size=size_annotation)
+ax1.legend(loc="upper right", prop={'size': size_legend})
+ax1.set_xlim([x_start, x_end])
+ax1.set_ylim([y_start, y_end])
+
+
+sigma2q = 1e-6 # Variance of random-walk noise
+corr_input = 0.98 # Level of correlation between input's entries.
+BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
+		   # GA-LMS --> Complete subalgebra of R^3
+		   # GA-LMS_rotors --> Even subalgebra of R^3 (isomorphic to quaternions)
+		   # GA-LMS_complex --> Even subalgebra of R^2 (isomorphic to complex numbers)
+		   # GA-LMS_real --> Even subalgebra of R (isomorphic to the real numbers)
+#====================================================
+
+data_dic = {}
+for sig in sigma2v:
+    # The binary is called below using the previously set parameters. The GA-LMS runs and returns .txt files with the results: *_galms.out and *_theory.out, where * represents "MSE" or "EMSE". *_galms.out files store the ensemble-average learning curves (EMSE), while *_theory.out files store the theoretical steady-state value for MSE and EMSE.
+
+    # Calling binary
+    arguments = " " + str(M) + " " + str(L) + " " + str(N) + " " + str(mu)+ " " + str(sig) + " " + str(sigma2q) + " " + str(corr_input)
+    print('> Calling binary with the following parameters: \n {}'.format(arguments))
+    os.popen("../../../src/GAAFs_standard/" + BINARY + "/build/" + BINARY + arguments).read()
+
+    # Load files EMSE_galms.out and EMSE_theory.out (generated by the binary) to plot
+    # EMSE learning curve and theoretical curve:
+    f1 = open('EMSE_galms.out', 'r')
+    data_label1 = ['EMSE_galms']
+    data1_list = []
+    for line in f1:
+        data1_list.append(line.rstrip('\n'))
+
+    f2 = open('EMSE_theory.out', 'r')
+    data_label2 = ['EMSE_theory']
+    data2_list = []
+    for line in f2:
+        for i in range(len(data1_list)):
+            data2_list.append(line.rstrip('\n'))
+
+    data1 = [float(j) for j in data1_list] # Converts to float
+    data2 = [float(j) for j in data2_list] # Converts to float
+    data1_dB = [10*log(x,10) for x in data1]
+    data2_dB = [10*log(x,10) for x in data2]
+
+    data_dic.update({'{}'.format(sig) : [data1_dB, data2_dB]})
+
+
+ax2.set_ylabel('EMSE (dB)')
+ax2.set_xlabel('Iterations')
+data_dic_keys = data_dic.keys()
+dic_sigma2v = dict(zip(data_dic_keys, [r'$\sigma^2_v=10^{-2}$', r'$\sigma^2_v=10^{-3}$', r'$\sigma^2_v=10^{-5}$']))
+for i in range(len(data_dic_keys)):
+    key = data_dic_keys[i]
+    # ax2.plot(data_dic[key][1], label = r'$\sigma^2_v={}$ (theory)'.format(key), color = 'magenta', linestyle = '--')
+    ax2.plot(data_dic[key][0], label = "{}".format(dic_sigma2v[key]), color = colors[i])
+    # ax2.annotate("{}".format(dic_sigma2v[key]), xy=(2600, y_annotation[i]), size=size_annotation)
+ax2.annotate("b = {}".format(corr_input), xy=(500, 25), size=size_annotation)
+ax2.annotate("{}".format(r'$\sigma^2_q = 10^{-6}$'), xy=(500, 10), size=size_annotation)
+ax2.annotate("{:.2f} dB".format(data_dic[key][0][-1]), xy=(5990, data_dic[key][0][-1]), xytext=(4200, -35), arrowprops=dict(facecolor='red', color='red', width=1, headwidth=4, shrink=0.05), size=size_annotation)
 # plt.legend(loc="best")
-plt.xlim([x_start, x_end])
+ax2.set_xlim([x_start, x_end])
+ax2.set_ylim([y_start, y_end])
 fig.set_size_inches(width, height)
 #plt.savefig('EMSE.png', bbox_inches='tight')
 pp.savefig()
 #plt.show()
 plt.close()
 pp.close()
+
+
+
 
 
 # ##############################################
