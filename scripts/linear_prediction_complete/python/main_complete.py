@@ -29,10 +29,10 @@ custom_lines = [Line2D([0], [0], color='magenta', linestyle='--', lw=1)]
 #
 # Measurement Noise variance: sigma2v
 
-M       = 6 # System order
+M       = 4 # System order
 L       = 1 # Realizations
-N       = 1300 # Time iterations
-mu      = 0.6e-9 # AF Step size
+N       = 1200 # Time iterations
+mu      = 0.8e-9 # AF Step size
 sigma2v = 0 # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
 corr_input = 0 # Level of correlation between input's entries.
@@ -69,7 +69,7 @@ x_end = N #1000
 plot_LMSs = True
 
 # Call regular LMS to estimate each data column
-mu_list = [1e-9, 1e-8, 0.5e-8, 3e-8, 0.5e-7, 0.5e-7, 0.5e-7, 1.6e-6]
+mu_list = [1e-9, 1e-8, 0.5e-8, 3e-8, 1e-6, 1e-6, 1e-6, 1.6e-6]
 LMS_curves_to_plot = range(8)
 for col_number in LMS_curves_to_plot:
     BINARY  = 'GA-LMS_real_linpred' # Note that you can call any of the following binaries:
@@ -105,7 +105,7 @@ for i in np.linspace(0, 1, 8):
     colors.append(cmap(i))
 
 if plot_LMSs:
-    for col_number in [4]:
+    for col_number in LMS_curves_to_plot:
         f3 = open('MSE_galms_real_{}.out'.format(col_number), 'r')
         # data_label3 = ['MSE_galms_real']
         data3_list = []
@@ -411,7 +411,7 @@ plt.close()
 
 # Zoomed-in figures 3
 zoom_range_start = 1000
-zoom_range_end = 1300
+zoom_range_end = 1200
 fig, [ax1, ax2] = plt.subplots(2, 1)
 ax1.set_ylabel('deg')
 # ax1.set_xlabel('Iterations')
