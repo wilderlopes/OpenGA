@@ -78,10 +78,10 @@ elif action == 'complete':
 
     df_master = df_master[constants.COLS_FOR_SIM_COMPLETE]
     print(df_master.head())
-    df = df_master[10000:].reset_index()
+    df = df_master[14000:].reset_index()
 
     # resample from 20Hz to 5Hz
-    df = df.iloc[::4, :]
+    # df = df.iloc[::4, :]
     df = df.reset_index()
     df = df[constants.COLS_FOR_SIM_COMPLETE]
     print(df.head())

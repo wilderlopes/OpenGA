@@ -65,7 +65,7 @@ width  = 6 #3.487
 height = width / 1.618
 size_annotation = 10
 size_annotation_zoom = 7
-size_legend = 7
+size_legend = 8
 sizedot = 5
 linewidth = 2
 
@@ -301,9 +301,9 @@ pp = PdfPages(savefolder + '/TSP_GAAFs_Fig_5_Top_correlated_randomwalk.pdf') # m
 
 M       = 10 # System order
 L       = 100 # Realizations
-N       = 6000 # Time iterations
+N       = 5000 # Time iterations
 mu      = 0.01 # AF Step size
-sigma2v = [1e-2, 1e-3, 1e-5] # Variance of measurement noise 
+sigma2v = [1e-2, 1e-3, 1e-5] # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
 corr_input = 0.98 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
@@ -364,17 +364,17 @@ dic_sigma2v = dict(zip(data_dic_keys, [r'$\sigma^2_v=10^{-2}$', r'$\sigma^2_v=10
 for i in range(len(data_dic_keys)):
     key = data_dic_keys[i]
     # ax1.plot(data_dic[key][1], label = r'$\sigma^2_v={}$ (theory)'.format(key), color = 'magenta', linestyle = '--')
-    ax1.plot(data_dic[key][0], label = "{}".format(dic_sigma2v[key]), color = colors[i])
+    ax1.plot(data_dic[key][0], label = "{}".format(dic_sigma2v[key]), color = colors[i], linewidth=linewidth)
     # ax1.annotate("{}".format(dic_sigma2v[key]), xy=(2600, y_annotation[i]), size=size_annotation)
-ax1.annotate("b = {}".format(corr_input), xy=(500, 25), size=size_annotation)
-ax1.annotate(r"$\sigma^2_q = {}$".format(sigma2q), xy=(500, 10), size=size_annotation)
-ax1.annotate("{:.2f} dB".format(data_dic[key][0][-1]), xy=(5990, data_dic[key][0][-1]), xytext=(4200, data_dic[key][0][-1] - 10), arrowprops=dict(facecolor='red', color='red', width=1, headwidth=4, shrink=0.05), size=size_annotation)
+ax1.annotate("b = {}".format(corr_input), xy=(500, 29), size=size_annotation)
+ax1.annotate(r"$\sigma^2_q = {}$".format(sigma2q), xy=(500, 13), size=size_annotation)
+ax1.annotate("{:.2f} dB".format(data_dic[key][0][-1]), xy=(4990, data_dic[key][0][-1]), xytext=(3200, data_dic[key][0][-1] + 10), arrowprops=dict(facecolor='red', color='red', width=1, headwidth=4, shrink=0.05), size=size_annotation)
 ax1.legend(loc="upper right", prop={'size': size_legend})
 ax1.set_xlim([x_start, x_end])
 ax1.set_ylim([y_start, y_end])
 
 
-sigma2q = 1e-6 # Variance of random-walk noise
+sigma2q = 4e-6 # Variance of random-walk noise
 corr_input = 0.98 # Level of correlation between input's entries.
 BINARY  = 'GA-LMS' # Note that you can call any of the following binaries:
 		   # GA-LMS --> Complete subalgebra of R^3
@@ -422,11 +422,11 @@ dic_sigma2v = dict(zip(data_dic_keys, [r'$\sigma^2_v=10^{-2}$', r'$\sigma^2_v=10
 for i in range(len(data_dic_keys)):
     key = data_dic_keys[i]
     # ax2.plot(data_dic[key][1], label = r'$\sigma^2_v={}$ (theory)'.format(key), color = 'magenta', linestyle = '--')
-    ax2.plot(data_dic[key][0], label = "{}".format(dic_sigma2v[key]), color = colors[i])
+    ax2.plot(data_dic[key][0], label = "{}".format(dic_sigma2v[key]), color = colors[i], linewidth=linewidth)
     # ax2.annotate("{}".format(dic_sigma2v[key]), xy=(2600, y_annotation[i]), size=size_annotation)
-ax2.annotate("b = {}".format(corr_input), xy=(500, 25), size=size_annotation)
-ax2.annotate("{}".format(r'$\sigma^2_q = 10^{-6}$'), xy=(500, 10), size=size_annotation)
-ax2.annotate("{:.2f} dB".format(data_dic[key][0][-1]), xy=(5990, data_dic[key][0][-1]), xytext=(4200, -35), arrowprops=dict(facecolor='red', color='red', width=1, headwidth=4, shrink=0.05), size=size_annotation)
+ax2.annotate("b = {}".format(corr_input), xy=(500, 29), size=size_annotation)
+ax2.annotate("{}".format(r'$\sigma^2_q = 4x10^{-6}$'), xy=(500, 13), size=size_annotation)
+ax2.annotate("{:.2f} dB".format(data_dic[key][0][-1]), xy=(4990, data_dic[key][0][-1]), xytext=(3200, -35), arrowprops=dict(facecolor='red', color='red', width=1, headwidth=4, shrink=0.05), size=size_annotation)
 # plt.legend(loc="best")
 ax2.set_xlim([x_start, x_end])
 ax2.set_ylim([y_start, y_end])

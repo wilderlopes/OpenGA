@@ -28,10 +28,11 @@ custom_lines = [Line2D([0], [0], color='magenta', linestyle='--', lw=1)]
 # AF step size: mu
 #
 # Measurement Noise variance: sigma2v
+mu_multiplier = 0.8
 
 M       = 4 # System order
 L       = 1 # Realizations
-N       = 1200 # Time iterations
+N       = 2000 # Time iterations
 mu      = 1e-9 # AF Step size
 sigma2v = 0 # Variance of measurement noise
 sigma2q = 0 # Variance of random-walk noise
@@ -69,7 +70,8 @@ x_end = N #1000
 plot_LMSs = True
 
 # Call regular LMS to estimate each data column
-mu_list = [1e-9, 1e-8, 0.5e-8, 3e-8, 1e-6, 1e-6, 1e-6, 1.6e-7]
+original_mus = [1e-9, 1e-8, 0.5e-8, 3e-8, 1e-8, 1e-8, 1e-8, 1e-5]
+mu_list = [x*mu_multiplier for x in original_mus]
 LMS_curves_to_plot = range(8)
 for col_number in LMS_curves_to_plot:
     BINARY  = 'GA-LMS_real_linpred' # Note that you can call any of the following binaries:
@@ -119,64 +121,99 @@ if plot_LMSs:
             # data3 = [sum(x) for x in zip(data3, data3_individual)]
             data3 += np.array(data3_individual)/len(LMS_curves_to_plot)
     data3_dB = [10*log(x,10) for x in list(data3)]
-    plt.plot(data3_dB, label = 'MSE_LMS_{}'.format(col_number), linestyle='--', color=colors[0], linewidth=linewidth)
+    # plt.plot(data3_dB, label = 'MSE_LMS_{}'.format(col_number), linestyle='--', color=colors[col_number], linewidth=linewidth)
+    plt.plot(data3_dB, label = 'LMS_avg', linestyle='--', color=colors[0], linewidth=linewidth)
 
 # plt.plot(data2_dB, label = 'MSE_theory')
-plt.plot(data1_dB, label = 'MSE_galms', color='green')
+plt.plot(data1_dB, label = 'GA-LMS', color='green')
 plt.legend()
 #plt.savefig('MSE.png', bbox_inches='tight')
 pp.savefig()
 # plt.show()
 plt.close()
 
-# Load files EMSE_galms.out and EMSE_theory.out to plot EMSE learning curve and theoretical curve:
-
-# f1 = open('EMSE_galms.out', 'r')
-# data_label1 = ['EMSE_galms']
-# data1_list = []
-# for line in f1:
-#     data1_list.append(line.rstrip('\n'))
-#
-# f2 = open('EMSE_theory.out', 'r')
-# data_label2 = ['EMSE_theory']
-# data2_list = []
-# for line in f2:
-#     for i in range(len(data1_list)):
-#         data2_list.append(line.rstrip('\n'))
-#
-# data1 = [float(j) for j in data1_list] # Converts to float
-# data2 = [float(j) for j in data2_list] # Converts to float
-# data1_dB = [10*log(x,10) for x in data1]
-# data2_dB = [10*log(x,10) for x in data2]
-#
-# plt.title('EMSE curves - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
-#           mu, sigma2v, sigma2q, corr_input), fontsize=9)
-# plt.ylabel('EMSE (dB)')
-# plt.xlabel('Iterations')
-# plt.plot(data1_dB, label = 'EMSE_galms', color = 'r')
-# plt.plot(data2_dB, label = 'EMSE_theory', color = 'magenta')
-# plt.legend()
-# #plt.savefig('EMSE.png', bbox_inches='tight')
-# pp.savefig()
-# #plt.show()
-#
-# plt.close()
-
-
-
 df = pd.read_csv('/home/openga/data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS_complete.csv')
 
+blades = [0, 1, 2, 4, 3, 5, 6, 7]
+cols = constants.COLS_FOR_SIM_COMPLETE
+dic = dict(zip(blades, cols))
+
+# Prediction gain ==============================================================
+# plt.title('Prediction Gain - {}, mu={}, sigma2v={}, sigma2q={}, corr_input={}'.format(BINARY,
+#           mu, sigma2v, sigma2q, corr_input), fontsize=9)
+# plt.ylabel('Prediction Gain (dB)')
+# plt.xlabel('Iterations')
+# cmap = plt.cm.autumn
+# colors = []
+# for i in np.linspace(0, 1, 8):
+#     colors.append(cmap(i))
+
+# # MSE GA-LMS
+# errorGALMS = np.array(data1)
+#
+# # Calculate average MSE of LMSs
+# for col_number in LMS_curves_to_plot:
+#     f3 = open('MSE_galms_real_{}.out'.format(col_number), 'r')
+#     errorLMS_list = []
+#     for line in f3:
+#         errorLMS_list.append(line.rstrip('\n'))
+#     errorLMS_individual = [float(j) for j in errorLMS_list] # Converts to float
+#     if col_number == 0:
+#         errorLMS = np.array(errorLMS_individual)/len(LMS_curves_to_plot)
+#     else:
+#         errorLMS += np.array(errorLMS_individual)/len(LMS_curves_to_plot)
+#
+# # Calculate average predicted input variance for GA-LMS and LMS
+# for i in range(8):
+#     f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
+#     inputGALMS_list = []
+#     for line in f1:
+#         inputGALMS_list.append(line.rstrip('\n'))
+#     inputGALMS_individual = [float(j) for j in inputGALMS_list] # Converts to float
+#     if i == 0:
+#         inputGALMS = np.array(inputGALMS_individual)/8
+#     else:
+#         inputGALMS += np.array(inputGALMS_individual)/8
+#
+#     f2 = open('y_galms_real_{}.out'.format(blades[i]), 'r')
+#     inputLMS_list = []
+#     for line in f2:
+#         inputLMS_list.append(line.rstrip('\n'))
+#     inputLMS_individual = [float(j) for j in inputLMS_list] # Converts to float
+#     if i == 0:
+#         inputLMS = np.array(inputLMS_individual)/8
+#     else:
+#         inputLMS += np.array(inputLMS_individual)/8
+#
+# # Rp for GA-LMS
+# Rp_GALMS_nolog = list(inputGALMS**2/errorGALMS)
+# for i in range(len(Rp_GALMS_nolog)):
+#     if Rp_GALMS_nolog[i] == 0.0:
+#         Rp_GALMS_nolog[i] == 1e-32
+# Rp_GALMS = [10*log(x,10) for x in Rp_GALMS_nolog[1:]]
+#
+# # Rp for LMS
+# Rp_LMS_nolog = list(inputLMS**2/errorLMS)
+# for i in range(len(Rp_LMS_nolog)):
+#     if Rp_LMS_nolog[i] == 0.0:
+#         Rp_LMS_nolog[i] == 1e-32
+# Rp_LMS = [10*log(x,10) for x in Rp_LMS_nolog[1:]]
+#
+# plt.plot(Rp_LMS, label = 'Rp_LMS = {}'.format(np.mean(Rp_LMS)), linestyle='--', color=colors[0], linewidth=linewidth)
+# plt.plot(Rp_GALMS, label = 'Rp_GA-LMS = {}'.format(np.mean(Rp_GALMS)), color='green')
+#
+# plt.legend()
+# pp.savefig()
+# plt.close()
+# ==============================================================
+
+# Predicted curves
 from matplotlib.lines import Line2D
 cmap = plt.cm.RdYlBu
 colors = []
 for i in np.linspace(0.8, 1, 8):
     # colors.append(cmap(i))
     colors.append((0, 0.8, 0.9))
-    # colors.append((0, 0.9, 0.1))
-# colors = ['orange', 'blue', 'green', 'black', ]
-blades = [0, 1, 2, 4, 3, 5, 6, 7]
-cols = constants.COLS_FOR_SIM_COMPLETE
-dic = dict(zip(blades, cols))
 
 fig, [ax1, ax2, ax3, ax4] = plt.subplots(4, 1, sharex=True)
 ax1.set_ylabel('mbar')
@@ -285,6 +322,103 @@ fig.set_size_inches(0.65*width, height)
 pp.savefig()
 plt.close()
 
+# =============================================================================
+# Zoomed-in figures
+zoom_range_start = 0 #300
+zoom_range_end = 100 #450
+fig, [ax1, ax2, ax3, ax4] = plt.subplots(1, 4)
+
+
+ax2.set_ylabel('m/s')
+# ax1.set_xlabel('Iterations')
+for i in range(1, 4):
+    f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
+    data1_list = []
+    for line in f1:
+        data1_list.append(line.rstrip('\n'))
+    data1 = [float(j) for j in data1_list] # Converts to float
+    data1 = data1[zoom_range_start:zoom_range_end]
+
+    f2 = open('y_galms_real_{}.out'.format(blades[i]), 'r')
+    data2_list = []
+    for line in f2:
+        data2_list.append(line.rstrip('\n'))
+    data2 = [float(j) for j in data2_list] # Converts to float
+    data2 = data2[zoom_range_start:zoom_range_end]
+
+    ax3.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=0.5*sizedot)
+    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    ax3.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
+    if plot_LMSs:
+        ax3.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
+ax2.legend(custom_lines, ['predicted'], loc=(0.6, 0.75))
+ax2.annotate('NorthSouth_Wind {{{}}}'.format(r"$\gamma_{2}$"), xy=(20, 1500), size=size_annotation)
+ax2.annotate('EastWest_Wind {{{}}}'.format(r"$\gamma_{1}$"), xy=(20, 980), size=size_annotation)
+ax2.annotate('Vertical_Wind {{{}}}'.format(r"$\gamma_{3}$"), xy=(20, 300), size=size_annotation)
+
+
+ax3.set_ylabel('deg')
+# ax1.set_xlabel('Iterations')
+for i in range(4, 7):
+    f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
+    data1_list = []
+    for line in f1:
+        data1_list.append(line.rstrip('\n'))
+    data1 = [float(j) for j in data1_list] # Converts to float
+    data1 = data1[zoom_range_start:zoom_range_end]
+
+    f2 = open('y_galms_real_{}.out'.format(blades[i]), 'r')
+    data2_list = []
+    for line in f2:
+        data2_list.append(line.rstrip('\n'))
+    data2 = [float(j) for j in data2_list] # Converts to float
+    data2 = data2[zoom_range_start:zoom_range_end]
+
+    ax3.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=0.5*sizedot)
+    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    ax3.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
+    if plot_LMSs:
+        ax3.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
+ax3.legend(custom_lines, ['predicted'], loc=(0.6, 0.75))
+ax3.annotate('Roll {{{}}}'.format(r"$\gamma_{12}$"), xy=(300, 200), size=size_annotation)
+ax3.annotate('Pitch {{{}}}'.format(r"$\gamma_{31}$"), xy=(300, 70), size=size_annotation)
+ax3.annotate('Yaw {{{}}}'.format(r"$\gamma_{23}$"), xy=(300, -110), size=size_annotation)
+# ax1.legend(prop={'size': size_legend})
+
+ax4.set_ylabel('deg')
+ax4.set_xlabel('Iterations')
+for i in [7]:
+    f1 = open('y_galms_{}.out'.format(blades[i]), 'r')
+    data1_list = []
+    for line in f1:
+        data1_list.append(line.rstrip('\n'))
+    data1 = [float(j) for j in data1_list] # Converts to float
+    data1 = data1[zoom_range_start:zoom_range_end]
+
+    f2 = open('y_galms_real_{}.out'.format(blades[i]), 'r')
+    data2_list = []
+    for line in f2:
+        data2_list.append(line.rstrip('\n'))
+    data2 = [float(j) for j in data2_list] # Converts to float
+    data2 = data2[zoom_range_start:zoom_range_end]
+
+    ax4.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1.3*sizedot)
+    # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
+    ax4.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
+    if plot_LMSs:
+        ax4.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
+ax4.annotate('Angle_Of_Attack {{{}}}'.format(r"$\gamma_{123}$"), xy=(375, 69), size=size_annotation)
+ax4.legend(prop={'size': size_legend}, loc='lower left')
+# ax2.legend(custom_lines, ['predicted'], loc='upper right')
+# fig.set_size_inches(width, 0.7*height)
+# fig.set_size_inches(0.95*height*height/width, height)
+fig.set_size_inches(0.35*width, height)
+plt.tight_layout()
+# plt.subplots_adjust(wspace=0.4)
+pp.savefig()
+plt.close()
+# =============================================================================
+
 # Zoomed-in figures
 zoom_range_start = 0 #300
 zoom_range_end = 100 #450
@@ -308,9 +442,9 @@ for i in range(4, 7):
 
     ax1.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=0.5*sizedot)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    ax1.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
     if plot_LMSs:
         ax1.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
-    ax1.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
 ax1.legend(custom_lines, ['predicted'], loc=(0.6, 0.75))
 ax1.annotate('Roll {{{}}}'.format(r"$\gamma_{12}$"), xy=(300, 200), size=size_annotation)
 ax1.annotate('Pitch {{{}}}'.format(r"$\gamma_{31}$"), xy=(300, 70), size=size_annotation)
@@ -336,9 +470,9 @@ for i in [7]:
 
     ax2.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1.3*sizedot)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
+    ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
     if plot_LMSs:
         ax2.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
-    ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
 ax2.annotate('Angle_Of_Attack {{{}}}'.format(r"$\gamma_{123}$"), xy=(375, 69), size=size_annotation)
 ax2.legend(prop={'size': size_legend}, loc='lower left')
 # ax2.legend(custom_lines, ['predicted'], loc='upper right')
@@ -373,9 +507,9 @@ for i in range(4, 7):
 
     ax1.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=0.5*sizedot)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    ax1.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
     if plot_LMSs:
         ax1.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
-    ax1.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
 ax1.legend(custom_lines, ['predicted'], loc=(0.6, 0.75))
 ax1.annotate('Roll {{{}}}'.format(r"$\gamma_{12}$"), xy=(300, 200), size=size_annotation)
 ax1.annotate('Pitch {{{}}}'.format(r"$\gamma_{31}$"), xy=(300, 70), size=size_annotation)
@@ -401,9 +535,9 @@ for i in [7]:
 
     ax2.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1.3*sizedot)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
+    ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
     if plot_LMSs:
         ax2.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
-    ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
 ax2.annotate('Angle_Of_Attack {{{}}}'.format(r"$\gamma_{123}$"), xy=(375, 69), size=size_annotation)
 ax2.legend(prop={'size': size_legend}, loc='lower left')
 # ax2.legend(custom_lines, ['predicted'], loc='upper right')
@@ -416,8 +550,8 @@ pp.savefig()
 plt.close()
 
 # Zoomed-in figures 3
-zoom_range_start = 1000
-zoom_range_end = 1200
+zoom_range_start = 1300
+zoom_range_end = 1600
 fig, [ax1, ax2] = plt.subplots(2, 1)
 ax1.set_ylabel('deg')
 # ax1.set_xlabel('Iterations')
@@ -438,9 +572,9 @@ for i in range(4, 7):
 
     ax1.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=0.5*sizedot)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linewidth=3)
+    ax1.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
     if plot_LMSs:
         ax1.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
-    ax1.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
 ax1.legend(custom_lines, ['predicted'], loc=(0.6, 0.75))
 ax1.annotate('Roll {{{}}}'.format(r"$\gamma_{12}$"), xy=(300, 200), size=size_annotation)
 ax1.annotate('Pitch {{{}}}'.format(r"$\gamma_{31}$"), xy=(300, 70), size=size_annotation)
@@ -466,9 +600,9 @@ for i in [7]:
 
     ax2.scatter(range(zoom_range_start, zoom_range_end), df[dic[blades[i]]].values[zoom_range_start:zoom_range_end], label = 'Actual'.format(dic[blades[i]]), color=colors[i], s=1.3*sizedot)
     # plt.plot(df[dic[blades[i]]].values[:len(data1)], label = 'y_galms_{}_{}'.format(blades[i], dic[blades[i]]), color=colors[i], linestyle=None, marker='.')
+    ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
     if plot_LMSs:
         ax2.plot(range(zoom_range_start, zoom_range_end), data2, label = 'LMS', linestyle='--', color='black', linewidth=linewidth)
-    ax2.plot(range(zoom_range_start, zoom_range_end), data1, label = 'GA-LMS', linestyle='--', color='magenta', linewidth=linewidth)
 ax2.annotate('Angle_Of_Attack {{{}}}'.format(r"$\gamma_{123}$"), xy=(375, 69), size=size_annotation)
 ax2.legend(prop={'size': size_legend}, loc='lower left')
 # ax2.legend(custom_lines, ['predicted'], loc='upper right')
