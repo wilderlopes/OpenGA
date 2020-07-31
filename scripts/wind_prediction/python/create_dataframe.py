@@ -2,12 +2,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import common.constants as constants
 
-# action = 'create'
+# To download dataset GRIP DC-8 METEOROLOGICAL MEASUREMENT SYSTEM (MMS)
+# website: https://ghrc.nsstc.nasa.gov/hydro/#/orders?mydata=gripmms&_k=kop5xp
+# command: 
+# wget --user wilderlopes --ask-password --auth-no-challenge --no-check-certificate -i ../../data/NASA_GRIP/GHRC_URLs.txt 
+
+#action = 'create'
 action = 'refine'
 
 if action == 'create':
 
-    filename = "../../data/NASA-GRIP/GRIP-MMS/GRIP_MM_20100810_20HZ.txt"
+    filename = "../../../data/NASA-GRIP/GRIP-MMS/GRIP_MM_20100810_20HZ.txt"
     first_row = 52
     f = open(filename)
 
@@ -38,11 +43,11 @@ if action == 'create':
     # print(df.columns)
     print(df[constants.COLS_FOR_SIM])
 
-    df.to_csv('../../data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS_master.csv')
+    df.to_csv('../../../data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS_master.csv')
 
 elif action == 'refine':
 
-    df_master = pd.read_csv('../../data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS_master.csv')
+    df_master = pd.read_csv('../../../data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS_master.csv')
 
     df_master = df_master[constants.COLS_FOR_SIM]
     print(df_master.head())
@@ -61,7 +66,7 @@ elif action == 'refine':
     print(df.columns)
     print('len(df) = {}'.format(len(df)))
     input()
-    df.to_csv('../../data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv')
+    df.to_csv('../../../data/NASA-GRIP/GRIP-MMS/NASA_GRIP_MMS.csv')
     # Plotting
     # pd.scatter_matrix(df[constants.COLS_FOR_SIM])
     #
@@ -77,4 +82,4 @@ elif action == 'refine':
         plt.plot(df.index.values, df[col].values, label=col)
     plt.legend()
 
-    plt.show()
+    #plt.show()
