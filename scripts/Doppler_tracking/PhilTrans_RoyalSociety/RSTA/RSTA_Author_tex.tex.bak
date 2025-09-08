@@ -1,0 +1,179 @@
+%% Author_tex.tex
+%% V1.0
+%% 2012/13/12
+%% developed by Techset
+%%
+%% This file describes the coding for rstrans.cls
+
+\documentclass[openacc]{rstransa}%%%%where rstrans is the template name
+
+%%%% *** Do not adjust lengths that control margins, column widths, etc. ***
+
+%%%%%%%%%%% Defining Enunciations  %%%%%%%%%%%
+\newtheorem{theorem}{\bf Theorem}[section]
+\newtheorem{condition}{\bf Condition}[section]
+\newtheorem{corollary}{\bf Corollary}[section]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%%%% Article title to be placed here
+\title{Insert the article title here}
+
+\author{%%%% Author details
+X. X. First author$^{1}$, X. Second author$^{2}$ and X. Third author$^{3}$}
+
+%%%%%%%%% Insert author address here
+\address{$^{1}$First author address\\
+$^{2}$Second author address\\
+$^{3}$Third author address}
+
+%%%% Subject entries to be placed here %%%%
+\subject{xxxxx, xxxxx, xxxx}
+
+%%%% Keyword entries to be placed here %%%%
+\keywords{xxxx, xxxx, xxxx}
+
+%%%% Insert corresponding author and its email address}
+\corres{Insert corresponding author name\\
+\email{xxx@xxxx.xx.xx}}
+
+%%%% Abstract text to be placed here %%%%%%%%%%%%
+\begin{abstract}
+The abstract text goes here. The abstract text goes here. The abstract text goes here. The abstract text goes here.
+The abstract text goes here. The abstract text goes here. The abstract text goes here. The abstract text goes here.
+\end{abstract}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%% Insert the texts which can accomdate on firstpage in the tag "fmtext" %%%%%
+
+\begin{fmtext}
+\section{Insert A head here}
+%%%% Insert A head here
+
+This demo file is intended to serve as a ``starter file''
+for rstrans journal papers produced under \LaTeX\ using
+rstransa.cls v1.0.
+
+\subsection{Insert B head here}
+%%%% Insert B head here
+Subsection text here.
+
+\subsubsection{Insert C head here}
+%%%% Insert C head here
+Subsubsection text here.
+
+\section{Equations}
+
+Sample equations.
+
+%%% Numbered equation
+\begin{align}\label{1.1}
+\begin{split}
+\frac{\partial u(t,x)}{\partial t} &= Au(t,x) \left(1-\frac{u(t,x)}{K}\right)-B\frac{u(t-\tau,x) w(t,x)}{1+Eu(t-\tau,x)},\\
+\frac{\partial w(t,x)}{\partial t} &=\delta \frac{\partial^2w(t,x)}{\partial x^2}-Cw(t,x)+D\frac{u(t-\tau,x)w(t,x)}{1+Eu(t-\tau,x)},
+\end{split}
+\end{align}
+
+\begin{align}\label{1.2}
+\begin{split}
+\frac{dU}{dt} &=\alpha U(t)(\gamma -U(t))-\frac{U(t-\tau)W(t)}{1+U(t-\tau)},\\
+\frac{dW}{dt} &=-W(t)+\beta\frac{U(t-\tau)W(t)}{1+U(t-\tau)}.
+\end{split}
+\end{align}
+
+%%%% Unnumbered equation
+\begin{eqnarray}
+\frac{\partial(F_1,F_2)}{\partial(c,\omega)}_{(c_0,\omega_0)} = \left|
+\begin{array}{ll}
+\frac{\partial F_1}{\partial c} &\frac{\partial F_1}{\partial \omega} \\\noalign{\vskip3pt}
+\frac{\partial F_2}{\partial c}&\frac{\partial F_2}{\partial \omega}
+\end{array}\right|_{(c_0,\omega_0)}\notag\\
+=-4c_0q\omega_0 -4c_0\omega_0p^2 =-4c_0\omega_0(q+p^2)>0.
+\end{eqnarray}
+\end{fmtext}
+
+%%%%%%%%%%%%%%% End of first page %%%%%%%%%%%%%%%%%%%%%
+
+\maketitle
+
+\section{Enunciations}
+
+\begin{theorem}\label{T0.1}
+Assume that $\alpha>0, \gamma>1, \beta>\frac{\gamma+1}{\gamma-1}$.
+Then there exists a small $\tau_1>0$, such that for $\tau\in
+[0,\tau_1)$, if $c$ crosses $c(\tau)$ from the direction of
+to  a small amplitude periodic traveling wave solution of
+(2.1), and the period of $(\check{u}^p(s),\check{w}^p(s))$ is
+\[
+\check{T}(c)=c\cdot \left[\frac{2\pi}{\omega(\tau)}+O(c-c(\tau))\right].
+\]
+\end{theorem}
+
+
+\begin{condition}\label{C2.2}
+From (0.8) and (2.10), it holds
+$\frac{d\omega}{d\tau}<0,\frac{dc}{d\tau}<0$ for $\tau\in
+[0,\tau_1)$. This fact yields that the system (2.1) with delay
+$\tau>0$ has the periodic traveling waves for smaller wave speed $c$
+than that the system (2.1) with $\tau=0$ does. That is, the
+delay perturbation stimulates an early occurrence of the traveling waves.
+\end{condition}
+
+
+\section{Figures \& Tables}
+
+The output for figure is:\vspace*{-7pt}
+
+\begin{figure}[!h]
+%\centering\includegraphics[width=2.5in]{xxxxxx.eps}
+%%% where xxxxxx name represents "figurename.eps"
+\caption{Insert figure caption here}
+\label{fig_sim}
+\end{figure}
+
+\vspace*{-5pt}
+
+\noindent The output for table is:\vspace*{-7pt}
+
+\begin{table}[!h]
+\caption{An Example of a Table}%%%Table caption goes here
+\label{table_example}
+\begin{tabular}{llll}%%%The number of columns has to be defined here
+\hline
+date &Dutch policy &date &European policy \\
+\hline
+1988 &Memorandum Prevention &1985 &European Directive (85/339) \\
+1991--1997 &{\bf Packaging Covenant I} & & \\
+1994 &Law Environmental Management &1994 &European Directive (94/62) \\
+1997 &Agreement Packaging and Packaging Waste & & \\\hline
+\end{tabular}
+\vspace*{-4pt}
+\end{table}%%%End of the table
+
+\section{Conclusion}
+The conclusion text goes here.\vskip6pt
+
+\ack{Insert acknowledgment text here.}
+
+
+%%%%%%%%%% Insert bibliography here %%%%%%%%%%%%%%
+
+\begin{thebibliography}{9}
+
+\bibitem{1} Allwood JM, Cullen JM. 2011 \textit{Sustainable materials:  with both eyes open}.
+Cambridge, UK: UIT Cambridge. See \href{http://www.withbotheyesopen.com}{http://www.withbotheyesopen.com}.
+
+\bibitem{2}  MacKay DJC. 2008  \textit{Sustainable energy:  without the hot air}.
+ Cambridge, UK: UIT Cambridge. See \href{http://www.withouthotair.com}{http://www.withouthotair.com}.
+
+\bibitem{3} Gallman PG. 2011  \textit{Green alternatives and national energy strategy: the facts
+ behind the headlines}.  Baltimore,\ MD: Johns Hopkins University Press.
+
+\bibitem{4} MacKay DJC. 2013.  Solar energy in the context of energy use, energy transportation, and
+ energy storage. \textit{Proc. R. Soc. A} \textbf{371}.
+
+\end{thebibliography}
+
+\end{document}

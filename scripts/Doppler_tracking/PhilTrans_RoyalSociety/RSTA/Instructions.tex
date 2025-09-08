@@ -1,0 +1,96 @@
+\documentclass{rstransa}
+
+\pagestyle{empty}
+\begin{document}
+
+\enlargethispage{24pt}
+
+\section{Instructions for RS \LaTeX\ Template}
+
+This latex class file is available for authors to prepare the manuscript for the Royal Society journals.
+It is assumed that the authors are familiar with either plain \TeX, \LaTeX,\ \AmS-\TeX\ or a standard latex set-up,
+hence only the essential points are described in this document. For more details please see the \textit{\LaTeX\ User's Guide}
+or \textit{The not so short introduction to \LaTeXe}.
+
+\section{Installation}
+Within the supplied set of files, \texttt{rstransa.cls} need to be copied into a directory
+where tex looks for input files. The other files need to be kept as a reference while preparing your manuscript.
+Please use pre-defined commands from \texttt{RSTA\_Author\_tex.tex} for title, authors, address, abstract, keywords, body etc.
+
+\section{How to start using rstransa.cls}
+Before you type anything that actually appears in the paper you need to include a \verb+\documentclass{rstransa}+ command
+at the very beginning and then, the two commands that have to be part of any latex document, \verb+\begin{document}+
+at the start and the \verb+\end{document}+ at the end of your paper. The main structure of your document should be as follows:
+
+\begin{verbatim}
+\documentclass{rstransa}
+\def\titlehead{Research}%%Please insert respective article type here
+\begin{document}
+\title{...}
+\author{....}
+\address{...}
+\subject{...}
+\keywords{...}
+\corres{...}
+
+\begin{abstract}
+..........
+..........
+\end{abstract}
+
+\begin{fmtext}
+............
+\end{fmtext}
+
+\maketitle
+....
+\section{....}
+...
+\subsection{....}
+....
+\end{document}
+\end{verbatim}
+
+Note: In order to insert few lines on first page use the command \verb+\begin{fmtext}....\end{fmtext}+ before \verb+\maketitle+ command.
+Please look into sample.tex for more clarification.
+
+\section{Preamble}
+
+In the preamble portion i.e. before \verb+\begin{document}+ insert the respective journal name:
+\verb+\jname{rsta}+ and \verb+\Journal{Phil. Trans. R. Soc}+ to get journal name in running heads.
+
+\section{Packages used by the class file}
+
+There are some packages that are essential when using the class file:
+\begin{verbatim}
+amsmath amssymb amsfonts amsthm graphicx endfloat endnotes setspace
+verbatim geometry times helvet courier mathtime bm url babel dcolumn
+\end{verbatim}
+
+\noindent Some commonly-used packages are already used by this class file:
+\begin{verbatim}
+xspace amscd rotating latexsym multicol array algorithm subfigure
+\end{verbatim}
+
+\noindent Note:
+
+For disclaimer section use the command \verb+\disclaimer{}+.
+
+For ethics section use the command \verb+\ethics{}+.
+
+For dataccess section use the command \verb+\dataccess{}+.
+
+For acknowledgement section use the command \verb+\ack{}+.
+
+For funding section use the command \verb+\funding{}+.
+
+For conflict section use the command \verb+\conflict{}+.
+
+\vskip2.5pc
+
+\noindent The rstransa file is intended as a guide only. Article lengths based
+on this estimation may be subject to change when the article is prepared for publication.
+Authors whose article is estimated close to the page charge limit should contact the office regarding page charges.
+
+
+\end{document}
