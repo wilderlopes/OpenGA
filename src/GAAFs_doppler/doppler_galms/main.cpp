@@ -85,10 +85,12 @@ int main(int argc, char* argv[])
     // Storage for estimated signals
     std::vector<mvType> x_estimated_avg(iterations, mvType{0, 0});
 
-    std::vector<double> MSE_new_filter_avg;  // For the new filter
+    std::vector<double> MSE_new_filter_avg;  // For the new filter (total error)
+    std::vector<double> EMSE_new_filter_avg; // For EMSE (estimation error without noise)
 
     // Resizing the following vectors to allocate memory
     MSE_new_filter_avg.resize(iterations);
+    EMSE_new_filter_avg.resize(iterations);
 
 for (size_t j = 0; j < realizations; ++j)
 {
@@ -107,14 +109,15 @@ for (size_t j = 0; j < realizations; ++j)
     // Storage for this realization's estimated signals
     std::vector<mvType> x_estimated_realization(iterations, mvType{0, 0});
 
-    // Redefining MSE vectors before each realization
+    // Redefining MSE and EMSE vectors before each realization
     std::vector<double> MSE_new_filter;
+    std::vector<double> EMSE_new_filter;
 
 for (size_t i = 0; i < iterations; ++i)
     {
         // Use the loaded signal instead of generating new ones
         x_current = input_signal[i];
-        std::cout << "x_current = " << x_current << std::endl;
+        //std::cout << "x_current = " << x_current << std::endl;
 
         // Generate noise for this realization
         for (size_t k = 0; k < 2; ++k)
@@ -146,6 +149,8 @@ for (size_t i = 0; i < iterations; ++i)
             // Update the rotor: r_i = r_{i-1} + update_term
             r_new = eval(r_old + update_term);
             
+            std::cout << "r_old = " << r_old << std::endl;
+            std::cout << "r_new = " << r_new << std::endl;
             // Normalize the rotor to maintain unit magnitude (important for rotors)
             double rotor_magnitude = eval(magnitude(r_new));
             if (rotor_magnitude > 1e-10) // Avoid division by zero
@@ -156,16 +161,24 @@ for (size_t i = 0; i < iterations; ++i)
             
             // Calculate estimation: x_i_estimate = r_i * x_{i-1} * reverse(r_i)
             x_estimate = eval(r_new * x_old * (~r_new));
-            
-            // Calculate error for the new filter
-            mvType estimation_error = eval(x_current - x_estimate);
-            double new_filter_error = eval(magnitude(estimation_error));
-            MSE_new_filter.push_back(pow(new_filter_error, 2));
+
+            // Calculate MSE (total error with noise): |x_noisy - x_estimate|^2
+            mvType mse_error = eval(x_noisy - x_estimate);
+            double mse_magnitude = eval(magnitude(mse_error));
+            MSE_new_filter.push_back(pow(mse_magnitude, 2));
+
+            // Calculate EMSE (estimation error without noise): |x_clean - x_estimate|^2
+            // x_clean = x_noisy - v (removing the noise component)
+            mvType x_clean = eval(x_noisy - v);
+            mvType emse_error = eval(x_clean - x_estimate);
+            double emse_magnitude = eval(magnitude(emse_error));
+            EMSE_new_filter.push_back(pow(emse_magnitude, 2));
         }
         else
         {
             // For first iteration, just store zero error and use current signal as estimate
             MSE_new_filter.push_back(0.0);
+            EMSE_new_filter.push_back(0.0);
             x_estimate = x_current;
         }
         
@@ -181,7 +194,8 @@ for (size_t i = 0; i < iterations; ++i)
     for (size_t r = 0; r < iterations; ++r)
     {
         MSE_new_filter_avg[r] = MSE_new_filter_avg[r] + MSE_new_filter[r]/realizations;
-        
+        EMSE_new_filter_avg[r] = EMSE_new_filter_avg[r] + EMSE_new_filter[r]/realizations;
+
         // Average the estimated signals
         double inv_realizations = 1.0 / realizations;
         x_estimated_avg[r] = eval(x_estimated_avg[r] + eval(inv_realizations * x_estimated_realization[r]));
@@ -200,6 +214,11 @@ for (size_t i = 0; i < iterations; ++i)
     std::ofstream output_MSE_new_filter("./MSE_new_filter.out");
     std::ostream_iterator<double> output_iterator_MSE_new_filter(output_MSE_new_filter, "\n");
     std::copy(MSE_new_filter_avg.begin(), MSE_new_filter_avg.end(), output_iterator_MSE_new_filter);
+
+    // Save EMSE results
+    std::ofstream output_EMSE_new_filter("./EMSE_new_filter.out");
+    std::ostream_iterator<double> output_iterator_EMSE_new_filter(output_EMSE_new_filter, "\n");
+    std::copy(EMSE_new_filter_avg.begin(), EMSE_new_filter_avg.end(), output_iterator_EMSE_new_filter);
 
     std::ofstream output_MSE_theory("./MSE_theory.out");
     output_MSE_theory << MSE_theory << '\n';
