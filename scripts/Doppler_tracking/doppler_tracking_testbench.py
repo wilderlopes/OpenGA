@@ -10,10 +10,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 #====================================================
 # Parameters based on Mars EDL communications scenario from the paper
 M       = 4     # System order (number of taps)
-L       = 10    # Realizations
+L       = 100   # Realizations
 N       = 10000 # Time iterations (increased for better convergence)
-mu      = 1e-2  # AF Step size
-mu_ga   = 1e-3  # AF Step size
+mu      = 1e-3  # ε-NLMS Step size
+mu_ga_complex = 1e-3  # GA-LMS Complex Step size
+mu_ga_rotors = 1e-4   # GA-LMS Rotors Step size
 sigma2v = 1e-2  # Variance of measurement noise
 Fs      = 100   # Sampling frequency (Hz)
 
@@ -22,7 +23,8 @@ f0 = 0          # Nominal frequency (after down-conversion)
 acceleration_peak_time = 2000   # Time of acceleration peak (sample index)
 parachute_time = 6000          # Time of parachute deployment (sample index)
 
-BINARY = '../../src/GAAFs_doppler/doppler_galms/build/doppler_galms'  # Your modified C++ binary name
+BINARY_COMPLEX = '../../src/GAAFs_doppler/doppler_galms_complex/build/doppler_galms_complex'  # Complex GA-LMS binary
+BINARY_ROTORS = '../../src/GAAFs_doppler/doppler_galms_rotors/build/doppler_galms_rotors'  # Quaternion rotors GA-LMS binary
 #====================================================
 
 def generate_mars_edl_doppler_profile(N):
@@ -147,7 +149,7 @@ class EpsilonNLMS:
     Based on the linear prediction approach from the Mars communications paper
     """
 
-    def __init__(self, M, mu, epsilon=1e-4):
+    def __init__(self, M, mu, epsilon=1e-5):
         """
         Initialize ε-NLMS filter
 
@@ -366,7 +368,7 @@ save_signal_to_file(avg_x_noisy, 'input_signal.txt')
 print("Processing with e-NLMS adaptive filter...")
 
 # Process signal with e-NLMS including EMSE calculation
-epsilon_nlms = EpsilonNLMS(M=M, mu=mu, epsilon=1e-4)
+epsilon_nlms = EpsilonNLMS(M=M, mu=mu, epsilon=1e-5)
 x_estimated_nlms, errors_nlms, emse_nlms = epsilon_nlms.process_signal_with_emse(avg_x_noisy, avg_x_clean)
 
 # Calculate MSE for e-NLMS
@@ -376,39 +378,70 @@ mse_nlms_db = 10 * np.log10(mse_nlms + 1e-12)
 # Convert EMSE to dB
 emse_nlms_db = 10 * np.log10(emse_nlms + 1e-12)
 
-print("Calling C++ GA-LMS binary...")
+print("Calling C++ GA-LMS Complex binary...")
 
-# Call the C++ binary with parameters
-arguments = " {} {} {} {} {}".format(M, L, N, mu_ga, sigma2v)
-binary_path = "./{}".format(BINARY)
-cmd = binary_path + arguments
-print("Executing: {}".format(cmd))
-os.system(cmd)
+# Call the Complex GA-LMS binary with parameters
+arguments_complex = " {} {} {} {} {}".format(M, L, N, mu_ga_complex, sigma2v)
+binary_path_complex = "./{}".format(BINARY_COMPLEX)
+cmd_complex = binary_path_complex + arguments_complex
+print("Executing: {}".format(cmd_complex))
+os.system(cmd_complex)
 
-print("Loading GA-LMS results...")
+print("Loading GA-LMS Complex results...")
 
-# Load results from C++ output files
+# Load results from Complex GA-LMS output files
 try:
-    mse_galms = np.loadtxt('MSE_new_filter.out')
-
-    # Load EMSE directly from C++ output (more accurate!)
-    emse_galms = np.loadtxt('EMSE_new_filter.out')
-
-    # Load estimated signal
-    x_estimated_galms = load_signal_from_file('x_estimated.out')
-    x_input_check = load_signal_from_file('x_input.out')
+    mse_galms_complex = np.loadtxt('MSE_new_filter.out')
+    emse_galms_complex = np.loadtxt('EMSE_new_filter.out')
+    x_estimated_galms_complex = load_signal_from_file('x_estimated.out')
+    x_input_check_complex = load_signal_from_file('x_input.out')
 
     # Convert MSE and EMSE to dB
-    mse_galms_db = 10 * np.log10(mse_galms + 1e-12)
-    emse_galms_db = 10 * np.log10(emse_galms + 1e-12)
+    mse_galms_complex_db = 10 * np.log10(mse_galms_complex + 1e-12)
+    emse_galms_complex_db = 10 * np.log10(emse_galms_complex + 1e-12)
 
 except Exception as e:
-    print("Error loading results files: {}".format(e))
-    mse_galms_db = np.zeros(N)
-    emse_galms = np.zeros(N)
-    emse_galms_db = np.zeros(N)
-    x_estimated_galms = avg_x_noisy  # fallback
-    x_input_check = avg_x_noisy
+    print("Error loading Complex GA-LMS results files: {}".format(e))
+    mse_galms_complex_db = np.zeros(N)
+    emse_galms_complex = np.zeros(N)
+    emse_galms_complex_db = np.zeros(N)
+    x_estimated_galms_complex = avg_x_noisy  # fallback
+    x_input_check_complex = avg_x_noisy
+
+print("Calling C++ GA-LMS Rotors binary...")
+
+# Call the Quaternion Rotors GA-LMS binary with parameters
+arguments_rotors = " {} {} {} {} {}".format(M, L, N, mu_ga_rotors, sigma2v)
+binary_path_rotors = "./{}".format(BINARY_ROTORS)
+cmd_rotors = binary_path_rotors + arguments_rotors
+print("Executing: {}".format(cmd_rotors))
+os.system(cmd_rotors)
+
+print("Loading GA-LMS Rotors results...")
+
+# Load results from Quaternion Rotors GA-LMS output files
+try:
+    mse_galms_rotors = np.loadtxt('MSE_new_filter_rotors.out')
+    emse_galms_rotors = np.loadtxt('EMSE_new_filter_rotors.out')
+    x_estimated_galms_rotors = load_signal_from_file('x_estimated_rotors.out')
+    x_input_check_rotors = load_signal_from_file('x_input_rotors.out')
+
+    # Convert MSE and EMSE to dB
+    mse_galms_rotors_db = 10 * np.log10(mse_galms_rotors + 1e-12)
+    emse_galms_rotors_db = 10 * np.log10(emse_galms_rotors + 1e-12)
+
+except Exception as e:
+    print("Error loading Rotors GA-LMS results files: {}".format(e))
+    mse_galms_rotors_db = np.zeros(N)
+    emse_galms_rotors = np.zeros(N)
+    emse_galms_rotors_db = np.zeros(N)
+    x_estimated_galms_rotors = avg_x_noisy  # fallback
+    x_input_check_rotors = avg_x_noisy
+
+# For backward compatibility, use complex version as primary
+mse_galms_db = mse_galms_complex_db
+emse_galms_db = emse_galms_complex_db
+x_estimated_galms = x_estimated_galms_complex
 
 print("Generating comparison charts...")
 
@@ -424,9 +457,10 @@ plt.figure(figsize=(18, 15))
 plt.subplot(4, 2, 1)
 plt.plot(time_vec[:1000], avg_x_clean[:1000].real, 'b-', linewidth=4, label='True signal (real)')
 plt.plot(time_vec[:1000], x_estimated_nlms[:1000].real, 'g--', linewidth=1.5, label='e-NLMS estimate (real)')
-if len(x_estimated_galms) > 0:
-    plt.plot(time_vec[:1000], x_estimated_galms[:1000].real, 'r--', linewidth=2, label='GA-LMS estimate (real)')
-#plt.plot(time_vec[:1000], avg_x_noisy[:1000].real, 'k:', linewidth=0.5, alpha=0.7, label='Noisy input (real)')
+if len(x_estimated_galms_complex) > 0:
+    plt.plot(time_vec[:1000], x_estimated_galms_complex[:1000].real, 'r--', linewidth=2, label='GA-LMS Complex (real)')
+if len(x_estimated_galms_rotors) > 0:
+    plt.plot(time_vec[:1000], x_estimated_galms_rotors[:1000].real, 'm--', linewidth=2, label='GA-LMS Rotors (real)')
 plt.xlabel('Sample Index')
 plt.ylabel('Real Part')
 plt.title('Signal Tracking Comparison - Real Part (First 1000 samples)')
@@ -437,9 +471,10 @@ plt.grid(True, alpha=0.3)
 plt.subplot(4, 2, 2)
 plt.plot(time_vec[:1000], avg_x_clean[:1000].imag, 'b-', linewidth=4, label='True signal (imag)')
 plt.plot(time_vec[:1000], x_estimated_nlms[:1000].imag, 'g--', linewidth=1.5, label='e-NLMS estimate (imag)')
-if len(x_estimated_galms) > 0:
-    plt.plot(time_vec[:1000], x_estimated_galms[:1000].imag, 'r--', linewidth=2, label='GA-LMS estimate (imag)')
-#plt.plot(time_vec[:1000], avg_x_noisy[:1000].imag, 'k:', linewidth=0.5, alpha=0.7, label='Noisy input (imag)')
+if len(x_estimated_galms_complex) > 0:
+    plt.plot(time_vec[:1000], x_estimated_galms_complex[:1000].imag, 'r--', linewidth=2, label='GA-LMS Complex (imag)')
+if len(x_estimated_galms_rotors) > 0:
+    plt.plot(time_vec[:1000], x_estimated_galms_rotors[:1000].imag, 'm--', linewidth=2, label='GA-LMS Rotors (imag)')
 plt.xlabel('Sample Index')
 plt.ylabel('Imaginary Part')
 plt.title('Signal Tracking Comparison - Imaginary Part (First 1000 samples)')
@@ -450,8 +485,10 @@ plt.grid(True, alpha=0.3)
 plt.subplot(4, 2, 3)
 plt.plot(time_vec[:1000], np.abs(avg_x_clean[:1000]), 'b-', linewidth=2, label='True magnitude')
 plt.plot(time_vec[:1000], np.abs(x_estimated_nlms[:1000]), 'g--', linewidth=1.5, label='e-NLMS magnitude')
-if len(x_estimated_galms) > 0:
-    plt.plot(time_vec[:1000], np.abs(x_estimated_galms[:1000]), 'r--', linewidth=1.5, label='GA-LMS magnitude')
+if len(x_estimated_galms_complex) > 0:
+    plt.plot(time_vec[:1000], np.abs(x_estimated_galms_complex[:1000]), 'r--', linewidth=1.5, label='GA-LMS Complex magnitude')
+if len(x_estimated_galms_rotors) > 0:
+    plt.plot(time_vec[:1000], np.abs(x_estimated_galms_rotors[:1000]), 'm--', linewidth=1.5, label='GA-LMS Rotors magnitude')
 plt.plot(time_vec[:1000], np.abs(avg_x_noisy[:1000]), 'k:', linewidth=0.5, alpha=0.7, label='Noisy magnitude')
 plt.xlabel('Sample Index')
 plt.ylabel('Magnitude')
@@ -463,8 +500,10 @@ plt.grid(True, alpha=0.3)
 plt.subplot(4, 2, 4)
 plt.plot(time_vec[:1000], np.angle(avg_x_clean[:1000]), 'b-', linewidth=2, label='True phase')
 plt.plot(time_vec[:1000], np.angle(x_estimated_nlms[:1000]), 'g--', linewidth=1.5, label='e-NLMS phase')
-if len(x_estimated_galms) > 0:
-    plt.plot(time_vec[:1000], np.angle(x_estimated_galms[:1000]), 'r--', linewidth=1.5, label='GA-LMS phase')
+if len(x_estimated_galms_complex) > 0:
+    plt.plot(time_vec[:1000], np.angle(x_estimated_galms_complex[:1000]), 'r--', linewidth=1.5, label='GA-LMS Complex phase')
+if len(x_estimated_galms_rotors) > 0:
+    plt.plot(time_vec[:1000], np.angle(x_estimated_galms_rotors[:1000]), 'm--', linewidth=1.5, label='GA-LMS Rotors phase')
 plt.xlabel('Sample Index')
 plt.ylabel('Phase (rad)')
 plt.title('Signal Tracking Comparison - Phase')
@@ -474,7 +513,8 @@ plt.grid(True, alpha=0.3)
 # MSE Learning Curves
 plt.subplot(4, 2, 5)
 plt.plot(time_vec, mse_nlms_db, 'g-', linewidth=2, label='e-NLMS MSE')
-plt.plot(time_vec, mse_galms_db, 'r-', linewidth=2, label='GA-LMS MSE')
+plt.plot(time_vec, mse_galms_complex_db, 'r-', linewidth=2, label='GA-LMS Complex MSE')
+plt.plot(time_vec, mse_galms_rotors_db, 'm-', linewidth=2, label='GA-LMS Rotors MSE')
 plt.axvline(x=acceleration_peak_time, color='orange', linestyle=':', alpha=0.7, label='Acceleration peak')
 plt.axvline(x=parachute_time, color='purple', linestyle=':', alpha=0.7, label='Parachute deployment')
 plt.xlabel('Sample Index')
@@ -486,7 +526,8 @@ plt.grid(True, alpha=0.3)
 # EMSE Learning Curves (NEW!)
 plt.subplot(4, 2, 6)
 plt.plot(time_vec, emse_nlms_db, 'g-', linewidth=2, label='e-NLMS EMSE')
-plt.plot(time_vec, emse_galms_db, 'r-', linewidth=2, label='GA-LMS EMSE')
+plt.plot(time_vec, emse_galms_complex_db, 'r-', linewidth=2, label='GA-LMS Complex EMSE')
+plt.plot(time_vec, emse_galms_rotors_db, 'm-', linewidth=2, label='GA-LMS Rotors EMSE')
 plt.axvline(x=acceleration_peak_time, color='orange', linestyle=':', alpha=0.7, label='Acceleration peak')
 plt.axvline(x=parachute_time, color='purple', linestyle=':', alpha=0.7, label='Parachute deployment')
 plt.xlabel('Sample Index')
@@ -498,10 +539,16 @@ plt.grid(True, alpha=0.3)
 # Error magnitude comparison
 plt.subplot(4, 2, 7)
 error_nlms_mag = np.abs(avg_x_clean - x_estimated_nlms)
-if len(x_estimated_galms) > 0:
-    error_galms_mag = np.abs(avg_x_clean - x_estimated_galms)
-    plt.plot(time_vec[:1000], error_galms_mag[:1000], 'r-', linewidth=1.5, label='GA-LMS error magnitude')
 plt.plot(time_vec[:1000], error_nlms_mag[:1000], 'g-', linewidth=1.5, label='e-NLMS error magnitude')
+
+if len(x_estimated_galms_complex) > 0:
+    error_galms_complex_mag = np.abs(avg_x_clean - x_estimated_galms_complex)
+    plt.plot(time_vec[:1000], error_galms_complex_mag[:1000], 'r-', linewidth=1.5, label='GA-LMS Complex error magnitude')
+
+if len(x_estimated_galms_rotors) > 0:
+    error_galms_rotors_mag = np.abs(avg_x_clean - x_estimated_galms_rotors)
+    plt.plot(time_vec[:1000], error_galms_rotors_mag[:1000], 'm-', linewidth=1.5, label='GA-LMS Rotors error magnitude')
+
 plt.xlabel('Sample Index')
 plt.ylabel('Error Magnitude')
 plt.title('Tracking Error Magnitude Comparison')
@@ -512,22 +559,30 @@ plt.grid(True, alpha=0.3)
 plt.subplot(4, 2, 8)
 # Calculate noise component (MSE - EMSE)
 noise_component_nlms = mse_nlms - emse_nlms
-noise_component_galms = emse_galms if len(x_estimated_galms) > 0 else np.zeros_like(emse_nlms)
-if len(x_estimated_galms) > 0:
-    noise_component_galms = mse_galms[:len(emse_galms)] - emse_galms
+noise_component_galms_complex = np.zeros_like(emse_nlms)
+noise_component_galms_rotors = np.zeros_like(emse_nlms)
+
+if len(x_estimated_galms_complex) > 0:
+    noise_component_galms_complex = mse_galms_complex[:len(emse_galms_complex)] - emse_galms_complex
+
+if len(x_estimated_galms_rotors) > 0:
+    noise_component_galms_rotors = mse_galms_rotors[:len(emse_galms_rotors)] - emse_galms_rotors
 
 plt.plot(time_vec[:1000], 10*np.log10(noise_component_nlms[:1000] + 1e-12), 'g:', linewidth=1.5, label='e-NLMS Noise Component')
 plt.plot(time_vec[:1000], emse_nlms_db[:1000], 'g-', linewidth=2, label='e-NLMS EMSE')
-if len(x_estimated_galms) > 0:
-    plt.plot(time_vec[:1000], 10*np.log10(noise_component_galms[:1000] + 1e-12), 'r:', linewidth=1.5, label='GA-LMS Noise Component')
-    plt.plot(time_vec[:1000], emse_galms_db[:1000], 'r-', linewidth=2, label='GA-LMS EMSE')
+if len(x_estimated_galms_complex) > 0:
+    plt.plot(time_vec[:1000], 10*np.log10(noise_component_galms_complex[:1000] + 1e-12), 'r:', linewidth=1.5, label='GA-LMS Complex Noise')
+    plt.plot(time_vec[:1000], emse_galms_complex_db[:1000], 'r-', linewidth=2, label='GA-LMS Complex EMSE')
+if len(x_estimated_galms_rotors) > 0:
+    plt.plot(time_vec[:1000], 10*np.log10(noise_component_galms_rotors[:1000] + 1e-12), 'm:', linewidth=1.5, label='GA-LMS Rotors Noise')
+    plt.plot(time_vec[:1000], emse_galms_rotors_db[:1000], 'm-', linewidth=2, label='GA-LMS Rotors EMSE')
 plt.xlabel('Sample Index')
 plt.ylabel('Power (dB)')
 plt.title('Error Decomposition: EMSE vs Noise')
 plt.legend()
 plt.grid(True, alpha=0.3)
 
-plt.suptitle('Mars EDL Signal Tracking: GA-LMS vs e-NLMS with EMSE Analysis', fontsize=16, fontweight='bold')
+plt.suptitle('Mars EDL Signal Tracking: e-NLMS vs GA-LMS Complex vs GA-LMS Rotors', fontsize=16, fontweight='bold')
 plt.tight_layout()
 pp.savefig()
 plt.close()
@@ -541,8 +596,10 @@ plt.figure(figsize=(15, 10))
 plt.subplot(2, 2, 1)
 plt.plot(time_vec, avg_x_clean.real, 'b-', linewidth=3, label='True signal (real)', alpha=0.8)
 plt.plot(time_vec, x_estimated_nlms.real, 'g-', linewidth=1, label='e-NLMS estimate (real)')
-if len(x_estimated_galms) > 0:
-    plt.plot(time_vec, x_estimated_galms.real, 'r-', linewidth=1, label='GA-LMS estimate (real)')
+if len(x_estimated_galms_complex) > 0:
+    plt.plot(time_vec, x_estimated_galms_complex.real, 'r-', linewidth=1, label='GA-LMS Complex estimate (real)')
+if len(x_estimated_galms_rotors) > 0:
+    plt.plot(time_vec, x_estimated_galms_rotors.real, 'm-', linewidth=1, label='GA-LMS Rotors estimate (real)')
 plt.axvline(x=acceleration_peak_time, color='orange', linestyle=':', linewidth=2, alpha=0.9)
 plt.axvline(x=parachute_time, color='purple', linestyle=':', linewidth=2, alpha=0.9)
 plt.xlabel('Sample Index')
@@ -555,8 +612,10 @@ plt.grid(True, alpha=0.3)
 plt.subplot(2, 2, 2)
 plt.plot(time_vec, avg_x_clean.imag, 'b-', linewidth=3, label='True signal (imag)', alpha=0.8)
 plt.plot(time_vec, x_estimated_nlms.imag, 'g-', linewidth=1, label='e-NLMS estimate (imag)')
-if len(x_estimated_galms) > 0:
-    plt.plot(time_vec, x_estimated_galms.imag, 'r-', linewidth=1, label='GA-LMS estimate (imag)')
+if len(x_estimated_galms_complex) > 0:
+    plt.plot(time_vec, x_estimated_galms_complex.imag, 'r-', linewidth=1, label='GA-LMS Complex estimate (imag)')
+if len(x_estimated_galms_rotors) > 0:
+    plt.plot(time_vec, x_estimated_galms_rotors.imag, 'm-', linewidth=1, label='GA-LMS Rotors estimate (imag)')
 plt.axvline(x=acceleration_peak_time, color='orange', linestyle=':', linewidth=2, alpha=0.9)
 plt.axvline(x=parachute_time, color='purple', linestyle=':', linewidth=2, alpha=0.9)
 plt.xlabel('Sample Index')
@@ -573,7 +632,10 @@ critical_range = slice(critical_start, critical_end)
 critical_time = time_vec[critical_range]
 
 plt.plot(critical_time, mse_nlms_db[critical_range], 'g-', linewidth=2, label='e-NLMS MSE')
-plt.plot(critical_time, mse_galms_db[critical_range], 'r-', linewidth=2, label='GA-LMS MSE')
+if len(mse_galms_complex_db) > 0:
+    plt.plot(critical_time, mse_galms_complex_db[critical_range], 'r-', linewidth=2, label='GA-LMS Complex MSE')
+if len(mse_galms_rotors_db) > 0:
+    plt.plot(critical_time, mse_galms_rotors_db[critical_range], 'm-', linewidth=2, label='GA-LMS Rotors MSE')
 plt.axvline(x=acceleration_peak_time, color='orange', linestyle=':', alpha=0.7, label='Acceleration peak')
 plt.axvline(x=parachute_time, color='purple', linestyle=':', alpha=0.7, label='Parachute deployment')
 plt.xlabel('Sample Index')
@@ -585,10 +647,16 @@ plt.grid(True, alpha=0.3)
 # Cumulative performance comparison
 plt.subplot(2, 2, 4)
 cumulative_mse_nlms = np.cumsum(mse_nlms_db) / np.arange(1, len(mse_nlms_db) + 1)
-cumulative_mse_galms = np.cumsum(mse_galms_db) / np.arange(1, len(mse_galms_db) + 1)
+if len(mse_galms_complex_db) > 0:
+    cumulative_mse_galms_complex = np.cumsum(mse_galms_complex_db) / np.arange(1, len(mse_galms_complex_db) + 1)
+if len(mse_galms_rotors_db) > 0:
+    cumulative_mse_galms_rotors = np.cumsum(mse_galms_rotors_db) / np.arange(1, len(mse_galms_rotors_db) + 1)
 
 plt.plot(time_vec, cumulative_mse_nlms, 'g-', linewidth=2, label='e-NLMS Cumulative MSE')
-plt.plot(time_vec, cumulative_mse_galms, 'r-', linewidth=2, label='GA-LMS Cumulative MSE')
+if len(mse_galms_complex_db) > 0:
+    plt.plot(time_vec, cumulative_mse_galms_complex, 'r-', linewidth=2, label='GA-LMS Complex Cumulative MSE')
+if len(mse_galms_rotors_db) > 0:
+    plt.plot(time_vec, cumulative_mse_galms_rotors, 'm-', linewidth=2, label='GA-LMS Rotors Cumulative MSE')
 plt.axvline(x=acceleration_peak_time, color='orange', linestyle=':', alpha=0.5)
 plt.axvline(x=parachute_time, color='purple', linestyle=':', alpha=0.5)
 plt.xlabel('Sample Index')
@@ -604,13 +672,15 @@ plt.close()
 
 # Print summary statistics
 print("\n" + "="*80)
-print("MARS EDL SIGNAL TRACKING COMPARISON: GA-LMS vs e-NLMS")
+print("MARS EDL SIGNAL TRACKING COMPARISON: e-NLMS vs GA-LMS Complex vs GA-LMS Rotors")
 print("="*80)
 print("Parameters:")
 print("  System order (M): {}".format(M))
 print("  Realizations (L): {}".format(L))
 print("  Iterations (N): {}".format(N))
-print("  Step size (mu): {}".format(mu))
+print("  e-NLMS Step size (mu): {}".format(mu))
+print("  GA-LMS Complex Step size (mu_ga_complex): {}".format(mu_ga_complex))
+print("  GA-LMS Rotors Step size (mu_ga_rotors): {}".format(mu_ga_rotors))
 print("  Noise variance (sigma2v): {}".format(sigma2v))
 print("  Sampling frequency: {} Hz".format(Fs))
 
@@ -620,98 +690,150 @@ print("  Parachute deployment: sample {}".format(parachute_time))
 
 print("\nPerformance Comparison:")
 final_mse_nlms = mse_nlms_db[-100:].mean() if len(mse_nlms_db) > 100 else mse_nlms_db[-1]
-final_mse_galms = mse_galms_db[-100:].mean() if len(mse_galms_db) > 100 else mse_galms_db[-1]
+final_mse_galms_complex = mse_galms_complex_db[-100:].mean() if len(mse_galms_complex_db) > 100 else mse_galms_complex_db[-1]
+final_mse_galms_rotors = mse_galms_rotors_db[-100:].mean() if len(mse_galms_rotors_db) > 100 else mse_galms_rotors_db[-1]
 print("  e-NLMS Final MSE: {:.2f} dB".format(final_mse_nlms))
-print("  GA-LMS Final MSE: {:.2f} dB".format(final_mse_galms))
+print("  GA-LMS Complex Final MSE: {:.2f} dB".format(final_mse_galms_complex))
+print("  GA-LMS Rotors Final MSE: {:.2f} dB".format(final_mse_galms_rotors))
 
 # EMSE Performance Analysis
 final_emse_nlms = emse_nlms_db[-100:].mean() if len(emse_nlms_db) > 100 else emse_nlms_db[-1]
-final_emse_galms = emse_galms_db[-100:].mean() if len(emse_galms_db) > 100 else emse_galms_db[-1]
+final_emse_galms_complex = emse_galms_complex_db[-100:].mean() if len(emse_galms_complex_db) > 100 else emse_galms_complex_db[-1]
+final_emse_galms_rotors = emse_galms_rotors_db[-100:].mean() if len(emse_galms_rotors_db) > 100 else emse_galms_rotors_db[-1]
 print("\nExcess Mean Square Error (EMSE) Analysis:")
 print("  e-NLMS Final EMSE: {:.2f} dB".format(final_emse_nlms))
-print("  GA-LMS Final EMSE: {:.2f} dB".format(final_emse_galms))
+print("  GA-LMS Complex Final EMSE: {:.2f} dB".format(final_emse_galms_complex))
+print("  GA-LMS Rotors Final EMSE: {:.2f} dB".format(final_emse_galms_rotors))
 
 # Calculate noise floor (difference between MSE and EMSE)
 noise_floor_nlms = final_mse_nlms - final_emse_nlms
-noise_floor_galms = final_mse_galms - final_emse_galms
+noise_floor_galms_complex = final_mse_galms_complex - final_emse_galms_complex
+noise_floor_galms_rotors = final_mse_galms_rotors - final_emse_galms_rotors
 print("  e-NLMS Noise Floor: {:.2f} dB".format(noise_floor_nlms))
-print("  GA-LMS Noise Floor: {:.2f} dB".format(noise_floor_galms))
+print("  GA-LMS Complex Noise Floor: {:.2f} dB".format(noise_floor_galms_complex))
+print("  GA-LMS Rotors Noise Floor: {:.2f} dB".format(noise_floor_galms_rotors))
 
-# MSE Comparison
-if final_mse_galms < final_mse_nlms:
-    improvement = final_mse_nlms - final_mse_galms
-    print("  MSE: GA-LMS improvement: {:.2f} dB".format(improvement))
-    print("  SUCCESS: GA-LMS outperforms e-NLMS in total MSE!")
+# MSE Comparison - Complex vs e-NLMS
+print("\nMSE Performance Analysis:")
+if final_mse_galms_complex < final_mse_nlms:
+    improvement_complex = final_mse_nlms - final_mse_galms_complex
+    print("  GA-LMS Complex vs e-NLMS: {:.2f} dB improvement".format(improvement_complex))
 else:
-    degradation = final_mse_galms - final_mse_nlms
-    print("  MSE: e-NLMS better by: {:.2f} dB".format(degradation))
-    print("  e-NLMS shows better total MSE performance")
+    degradation_complex = final_mse_galms_complex - final_mse_nlms
+    print("  GA-LMS Complex vs e-NLMS: {:.2f} dB worse".format(degradation_complex))
 
-# EMSE Comparison (estimation quality without noise)
-if final_emse_galms < final_emse_nlms:
-    emse_improvement = final_emse_nlms - final_emse_galms
-    print("  EMSE: GA-LMS improvement: {:.2f} dB".format(emse_improvement))
-    print("  GA-LMS shows superior estimation capability!")
+# MSE Comparison - Rotors vs e-NLMS
+if final_mse_galms_rotors < final_mse_nlms:
+    improvement_rotors = final_mse_nlms - final_mse_galms_rotors
+    print("  GA-LMS Rotors vs e-NLMS: {:.2f} dB improvement".format(improvement_rotors))
 else:
-    emse_degradation = final_emse_galms - final_emse_nlms
-    print("  EMSE: e-NLMS better by: {:.2f} dB".format(emse_degradation))
-    print("  e-NLMS shows better estimation capability")
+    degradation_rotors = final_mse_galms_rotors - final_mse_nlms
+    print("  GA-LMS Rotors vs e-NLMS: {:.2f} dB worse".format(degradation_rotors))
+
+# MSE Comparison - Complex vs Rotors
+if final_mse_galms_complex < final_mse_galms_rotors:
+    complex_advantage = final_mse_galms_rotors - final_mse_galms_complex
+    print("  GA-LMS Complex vs Rotors: {:.2f} dB better".format(complex_advantage))
+else:
+    rotors_advantage = final_mse_galms_complex - final_mse_galms_rotors
+    print("  GA-LMS Rotors vs Complex: {:.2f} dB better".format(rotors_advantage))
+
+# EMSE Comparison - Complex vs e-NLMS
+print("\nEMSE Performance Analysis:")
+if final_emse_galms_complex < final_emse_nlms:
+    emse_improvement_complex = final_emse_nlms - final_emse_galms_complex
+    print("  GA-LMS Complex vs e-NLMS: {:.2f} dB improvement".format(emse_improvement_complex))
+else:
+    emse_degradation_complex = final_emse_galms_complex - final_emse_nlms
+    print("  GA-LMS Complex vs e-NLMS: {:.2f} dB worse".format(emse_degradation_complex))
+
+# EMSE Comparison - Rotors vs e-NLMS
+if final_emse_galms_rotors < final_emse_nlms:
+    emse_improvement_rotors = final_emse_nlms - final_emse_galms_rotors
+    print("  GA-LMS Rotors vs e-NLMS: {:.2f} dB improvement".format(emse_improvement_rotors))
+else:
+    emse_degradation_rotors = final_emse_galms_rotors - final_emse_nlms
+    print("  GA-LMS Rotors vs e-NLMS: {:.2f} dB worse".format(emse_degradation_rotors))
+
+# EMSE Comparison - Complex vs Rotors
+if final_emse_galms_complex < final_emse_galms_rotors:
+    emse_complex_advantage = final_emse_galms_rotors - final_emse_galms_complex
+    print("  GA-LMS Complex vs Rotors: {:.2f} dB better".format(emse_complex_advantage))
+else:
+    emse_rotors_advantage = final_emse_galms_complex - final_emse_galms_rotors
+    print("  GA-LMS Rotors vs Complex: {:.2f} dB better".format(emse_rotors_advantage))
 
 # Convergence analysis
 print("\nConvergence Analysis:")
 steady_state_start = max(7500, N - 1000)  # After final discontinuity (sample 7000)
 emse_nlms_steady = emse_nlms_db[steady_state_start:].mean()
-emse_galms_steady = emse_galms_db[steady_state_start:].mean()
+emse_galms_complex_steady = emse_galms_complex_db[steady_state_start:].mean()
+emse_galms_rotors_steady = emse_galms_rotors_db[steady_state_start:].mean()
 print("  e-NLMS Steady-state EMSE: {:.2f} dB".format(emse_nlms_steady))
-print("  GA-LMS Steady-state EMSE: {:.2f} dB".format(emse_galms_steady))
+print("  GA-LMS Complex Steady-state EMSE: {:.2f} dB".format(emse_galms_complex_steady))
+print("  GA-LMS Rotors Steady-state EMSE: {:.2f} dB".format(emse_galms_rotors_steady))
 
 # Signal tracking quality assessment
-if len(x_estimated_galms) > 0:
-    # Real part tracking error
-    real_error_nlms = np.mean(np.abs(avg_x_clean.real - x_estimated_nlms.real))
-    real_error_galms = np.mean(np.abs(avg_x_clean.real - x_estimated_galms.real))
-    
-    # Imaginary part tracking error
-    imag_error_nlms = np.mean(np.abs(avg_x_clean.imag - x_estimated_nlms.imag))
-    imag_error_galms = np.mean(np.abs(avg_x_clean.imag - x_estimated_galms.imag))
-    
-    print("\nSignal Tracking Quality:")
-    print("  e-NLMS Real part MAE: {:.6f}".format(real_error_nlms))
-    print("  GA-LMS Real part MAE: {:.6f}".format(real_error_galms))
-    print("  e-NLMS Imag part MAE: {:.6f}".format(imag_error_nlms))
-    print("  GA-LMS Imag part MAE: {:.6f}".format(imag_error_galms))
-    
-    # Overall complex signal tracking
-    complex_error_nlms = np.mean(np.abs(avg_x_clean - x_estimated_nlms))
-    complex_error_galms = np.mean(np.abs(avg_x_clean - x_estimated_galms))
-    
-    print("  e-NLMS Complex signal MAE: {:.6f}".format(complex_error_nlms))
-    print("  GA-LMS Complex signal MAE: {:.6f}".format(complex_error_galms))
-    
-    if complex_error_galms < complex_error_nlms:
-        improvement_pct = ((complex_error_nlms - complex_error_galms) / complex_error_nlms) * 100
-        print("  GA-LMS shows {:.1f}% better signal tracking".format(improvement_pct))
-    else:
-        degradation_pct = ((complex_error_galms - complex_error_nlms) / complex_error_nlms) * 100
-        print("  e-NLMS shows {:.1f}% better signal tracking".format(degradation_pct))
+print("\nSignal Tracking Quality:")
 
-    # Critical periods analysis
-    accel_indices = slice(max(0, acceleration_peak_time-100), min(N, acceleration_peak_time+100))
-    parachute_indices = slice(max(0, parachute_time-100), min(N, parachute_time+100))
-    
-    accel_error_nlms = np.mean(np.abs(avg_x_clean[accel_indices] - x_estimated_nlms[accel_indices]))
-    accel_error_galms = np.mean(np.abs(avg_x_clean[accel_indices] - x_estimated_galms[accel_indices]))
-    
-    parachute_error_nlms = np.mean(np.abs(avg_x_clean[parachute_indices] - x_estimated_nlms[parachute_indices]))
-    parachute_error_galms = np.mean(np.abs(avg_x_clean[parachute_indices] - x_estimated_galms[parachute_indices]))
-    
-    print("\nCritical EDL Period Analysis:")
-    print("  Acceleration peak period:")
-    print("    e-NLMS MAE: {:.6f}".format(accel_error_nlms))
-    print("    GA-LMS MAE: {:.6f}".format(accel_error_galms))
-    print("  Parachute deployment period:")
-    print("    e-NLMS MAE: {:.6f}".format(parachute_error_nlms))
-    print("    GA-LMS MAE: {:.6f}".format(parachute_error_galms))
+# e-NLMS tracking errors
+real_error_nlms = np.mean(np.abs(avg_x_clean.real - x_estimated_nlms.real))
+imag_error_nlms = np.mean(np.abs(avg_x_clean.imag - x_estimated_nlms.imag))
+complex_error_nlms = np.mean(np.abs(avg_x_clean - x_estimated_nlms))
+
+print("  e-NLMS Real part MAE: {:.6f}".format(real_error_nlms))
+print("  e-NLMS Imag part MAE: {:.6f}".format(imag_error_nlms))
+print("  e-NLMS Complex signal MAE: {:.6f}".format(complex_error_nlms))
+
+# GA-LMS Complex tracking errors
+if len(x_estimated_galms_complex) > 0:
+    real_error_galms_complex = np.mean(np.abs(avg_x_clean.real - x_estimated_galms_complex.real))
+    imag_error_galms_complex = np.mean(np.abs(avg_x_clean.imag - x_estimated_galms_complex.imag))
+    complex_error_galms_complex = np.mean(np.abs(avg_x_clean - x_estimated_galms_complex))
+
+    print("  GA-LMS Complex Real part MAE: {:.6f}".format(real_error_galms_complex))
+    print("  GA-LMS Complex Imag part MAE: {:.6f}".format(imag_error_galms_complex))
+    print("  GA-LMS Complex signal MAE: {:.6f}".format(complex_error_galms_complex))
+
+# GA-LMS Rotors tracking errors
+if len(x_estimated_galms_rotors) > 0:
+    real_error_galms_rotors = np.mean(np.abs(avg_x_clean.real - x_estimated_galms_rotors.real))
+    imag_error_galms_rotors = np.mean(np.abs(avg_x_clean.imag - x_estimated_galms_rotors.imag))
+    complex_error_galms_rotors = np.mean(np.abs(avg_x_clean - x_estimated_galms_rotors))
+
+    print("  GA-LMS Rotors Real part MAE: {:.6f}".format(real_error_galms_rotors))
+    print("  GA-LMS Rotors Imag part MAE: {:.6f}".format(imag_error_galms_rotors))
+    print("  GA-LMS Rotors Complex signal MAE: {:.6f}".format(complex_error_galms_rotors))
+
+# Critical periods analysis
+accel_indices = slice(max(0, acceleration_peak_time-100), min(N, acceleration_peak_time+100))
+parachute_indices = slice(max(0, parachute_time-100), min(N, parachute_time+100))
+
+accel_error_nlms = np.mean(np.abs(avg_x_clean[accel_indices] - x_estimated_nlms[accel_indices]))
+parachute_error_nlms = np.mean(np.abs(avg_x_clean[parachute_indices] - x_estimated_nlms[parachute_indices]))
+
+print("\nCritical EDL Period Analysis:")
+print("  Acceleration peak period:")
+print("    e-NLMS MAE: {:.6f}".format(accel_error_nlms))
+
+if len(x_estimated_galms_complex) > 0:
+    accel_error_galms_complex = np.mean(np.abs(avg_x_clean[accel_indices] - x_estimated_galms_complex[accel_indices]))
+    parachute_error_galms_complex = np.mean(np.abs(avg_x_clean[parachute_indices] - x_estimated_galms_complex[parachute_indices]))
+    print("    GA-LMS Complex MAE: {:.6f}".format(accel_error_galms_complex))
+
+if len(x_estimated_galms_rotors) > 0:
+    accel_error_galms_rotors = np.mean(np.abs(avg_x_clean[accel_indices] - x_estimated_galms_rotors[accel_indices]))
+    parachute_error_galms_rotors = np.mean(np.abs(avg_x_clean[parachute_indices] - x_estimated_galms_rotors[parachute_indices]))
+    print("    GA-LMS Rotors MAE: {:.6f}".format(accel_error_galms_rotors))
+
+print("  Parachute deployment period:")
+print("    e-NLMS MAE: {:.6f}".format(parachute_error_nlms))
+
+if len(x_estimated_galms_complex) > 0:
+    print("    GA-LMS Complex MAE: {:.6f}".format(parachute_error_galms_complex))
+
+if len(x_estimated_galms_rotors) > 0:
+    print("    GA-LMS Rotors MAE: {:.6f}".format(parachute_error_galms_rotors))
 
 print("="*80)
 
